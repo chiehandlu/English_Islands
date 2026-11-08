@@ -1,3 +1,4 @@
+import { FLASH_PERIOD, fall, flashAt, weatherBox, weatherSky } from "./weather";
 import { describe, expect, it } from "vitest";
 import { ISLANDS } from "@/content/islands";
 import { FLOWS } from "@/content/flows";
@@ -82,5 +83,37 @@ describe("lighting", () => {
 
   it("is darker at night than at noon", () => {
     expect(lightingAt(22).sunIntensity).toBeLessThan(lightingAt(14).sunIntensity);
+  });
+});
+
+describe("weather", () => {
+  const box = weatherBox(
+    [
+      [0, 0],
+      [10, 4],
+    ],
+    2,
+    20,
+  );
+
+  it("frames the islands with padding", () => {
+    expect(box).toEqual({ minX: -2, maxX: 12, minZ: -2, maxZ: 6, top: 20, bottom: 0 });
+  });
+
+  it("falls and wraps back to the top", () => {
+    expect(fall(10, 5, 1, box)).toBe(5);
+    expect(fall(1, 5, 1, box)).toBe(16);
+  });
+
+  it("flashes briefly once per period and stays dark otherwise", () => {
+    expect(flashAt(0.05)).toBe(1);
+    expect(flashAt(0.2)).toBe(0);
+    expect(flashAt(3)).toBe(0);
+    expect(flashAt(FLASH_PERIOD + 0.05)).toBe(1);
+  });
+
+  it("keeps the sky unchanged on sunny days and tints it otherwise", () => {
+    expect(weatherSky("#88ccee", "sunny")).toBe("#88ccee");
+    expect(weatherSky("#88ccee", "thunder")).not.toBe("#88ccee");
   });
 });

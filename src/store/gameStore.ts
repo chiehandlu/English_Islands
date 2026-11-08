@@ -8,6 +8,8 @@ import {
   type FarmResult,
   adoptPet,
   buyDecor,
+  buyWeather,
+  carePlant,
   createFarmState,
   feedPet,
   moveDecor,
@@ -15,6 +17,7 @@ import {
   renamePet,
   sendOutside,
   setPetSlot,
+  setWeather,
 } from "@/game/farm";
 import { addMistake, recordAnswer, resolveMistake, toDateString } from "@/game/review";
 import {
@@ -24,7 +27,7 @@ import {
   applyRunRewards,
   claimMilestones,
 } from "@/game/rewards";
-import type { FeedItem, GameState } from "@/game/types";
+import type { FeedItem, GameState, WeatherId } from "@/game/types";
 
 export interface QuizSummary extends RewardResult {
   milestones: RewardEvent[];
@@ -47,6 +50,9 @@ interface GameStore extends GameState {
   sendOut: (petId: string) => FarmResult;
   sendHome: (petId: string) => FarmResult;
   rename: (petId: string, name: string) => void;
+  care: (decorId: string, item: FeedItem) => FarmResult;
+  buyWeather: (id: WeatherId) => FarmResult;
+  setWeather: (id: WeatherId) => FarmResult;
   reset: () => void;
 }
 
@@ -105,13 +111,17 @@ export const useGameStore = create<GameStore>()(
         sendOut: (petId) => apply(sendOutside(pickState(get()), petId)),
         sendHome: (petId) => apply(setPetSlot(pickState(get()), petId, null)),
         rename: (petId, name) => set(renamePet(pickState(get()), petId, name)),
+        care: (decorId, item) => apply(carePlant(pickState(get()), decorId, item, today())),
+        buyWeather: (id) => apply(buyWeather(pickState(get()), id)),
+        setWeather: (id) => apply(setWeather(pickState(get()), id)),
         reset: () => set(createInitialState()),
       };
     },
     {
       name: "english-island-save",
       // v2：加入農場（inventory、pets、decor、每日計數）；v3：農場加 landExpanded；v4：questionStats
-      version: 4,
+      // v5：農場加天氣（weather、weatherOwned）；植物的 growth 等欄位是選填，舊裝飾不用補
+      version: 5,
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => pickState(s),
       migrate: (persisted, version) => {

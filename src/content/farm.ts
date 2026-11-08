@@ -1,4 +1,12 @@
-import type { CoreIslandKind, DecorKind, ItemId, PetKind, QuestionType } from "@/game/types";
+import type {
+  CoreIslandKind,
+  DecorKind,
+  ItemId,
+  PetKind,
+  QuestionType,
+  ThemeKind,
+  WeatherKind,
+} from "@/game/types";
 
 /**
  * 農場的圖鑑與價格。全部是資料：改數字不用動程式。
@@ -168,7 +176,87 @@ export const PET_KINDS: PetKind[] = [
     favorite: "veg",
     achievement: "streak_7",
   },
+  // ---------- 主題寵物：完成對應單元才開放 ----------
+  {
+    id: "bat",
+    name: "小蝙蝠",
+    emoji: "🦇",
+    tier: "advanced",
+    favorite: "veg",
+    price: { coin: 40, page: 20, key: 1 },
+    theme: "halloween",
+  },
+  {
+    id: "black-cat",
+    name: "黑貓",
+    emoji: "🐈‍⬛",
+    tier: "advanced",
+    favorite: "grain",
+    price: { coin: 40, page: 20, key: 1 },
+    theme: "halloween",
+  },
+  {
+    id: "ghost",
+    name: "小幽靈",
+    emoji: "👻",
+    tier: "rare",
+    favorite: "veg",
+    price: { coin: 60, page: 30, key: 3 },
+    theme: "halloween",
+  },
+  {
+    id: "penguin",
+    name: "企鵝",
+    emoji: "🐧",
+    tier: "advanced",
+    favorite: "grain",
+    price: { coin: 40, page: 20, key: 1 },
+    theme: "christmas",
+  },
+  {
+    id: "reindeer",
+    name: "麋鹿",
+    emoji: "🦌",
+    tier: "advanced",
+    favorite: "veg",
+    price: { coin: 40, page: 20, key: 1 },
+    theme: "christmas",
+  },
+  {
+    id: "polar-bear",
+    name: "北極熊",
+    emoji: "🐻‍❄️",
+    tier: "rare",
+    favorite: "grain",
+    price: { coin: 60, page: 30, key: 3 },
+    theme: "christmas",
+  },
 ];
+
+/**
+ * 主題：每完成一個單元開放一組。新單元想要新主題，就在這裡加一筆，
+ * 再把寵物、裝飾、植物標上同一個 theme。
+ */
+export const THEMES: ThemeKind[] = [
+  { id: "halloween", name: "萬聖節", emoji: "🎃", unlockUnit: "u03" },
+  { id: "christmas", name: "聖誕節", emoji: "🎄", unlockUnit: "u04" },
+];
+
+export function getTheme(id: string): ThemeKind | undefined {
+  return THEMES.find((t) => t.id === id);
+}
+
+/** 天氣：晴天一開始就有，其他買一次之後隨時切換。整個群島都會一起變。 */
+export const WEATHER_KINDS: WeatherKind[] = [
+  { id: "sunny", name: "晴天", emoji: "☀️", price: {} },
+  { id: "rain", name: "下雨", emoji: "🌧️", price: { coin: 30, page: 5 } },
+  { id: "snow", name: "下雪", emoji: "❄️", price: { coin: 40, page: 10 } },
+  { id: "thunder", name: "打雷", emoji: "⛈️", price: { coin: 50, page: 10, key: 1 } },
+];
+
+export function getWeather(id: string): WeatherKind | undefined {
+  return WEATHER_KINDS.find((w) => w.id === id);
+}
 
 export const DECOR_KINDS: DecorKind[] = [
   { id: "flag", name: "小旗子", emoji: "🚩", price: { wood: 5 }, buyable: true },
@@ -228,6 +316,67 @@ export const DECOR_KINDS: DecorKind[] = [
     effect: "land",
     maxCount: 1,
     requiresUnitComplete: true,
+  },
+  // ---------- 植物：種在裝飾格，用 🌾／🥕 照顧才會長大 ----------
+  ...(
+    [
+      ["tulip", "鬱金香", "🌷", { coin: 5, grain: 3 }, undefined],
+      ["sunflower", "向日葵", "🌻", { coin: 8, grain: 5 }, undefined],
+      ["strawberry", "草莓", "🍓", { coin: 10, veg: 4 }, undefined],
+      ["corn", "玉米", "🌽", { coin: 10, grain: 8 }, undefined],
+      ["pumpkin", "南瓜", "🎃", { coin: 12, veg: 6 }, "halloween"],
+      ["xmas-tree", "聖誕樹", "🎄", { coin: 15, wood: 5 }, "christmas"],
+    ] as const
+  ).map(([id, name, emoji, price, theme]): DecorKind => ({
+    id,
+    name,
+    emoji,
+    price,
+    buyable: true,
+    theme,
+    plant: { stages: ["🌱", id === "xmas-tree" ? "🌲" : "🌿", emoji], sproutAt: 3, grownAt: 6 },
+  })),
+  // ---------- 主題裝飾 ----------
+  { id: "web", name: "蜘蛛網", emoji: "🕸️", price: { wood: 8 }, buyable: true, theme: "halloween" },
+  {
+    id: "candy",
+    name: "糖果堆",
+    emoji: "🍬",
+    price: { wood: 6, brick: 4 },
+    buyable: true,
+    theme: "halloween",
+  },
+  {
+    id: "candle",
+    name: "蠟燭",
+    emoji: "🕯️",
+    price: { wood: 5, brick: 5 },
+    buyable: true,
+    theme: "halloween",
+  },
+  {
+    id: "snowman",
+    name: "雪人",
+    emoji: "⛄",
+    price: { wood: 8, brick: 4 },
+    buyable: true,
+    theme: "christmas",
+  },
+  {
+    id: "gifts",
+    name: "禮物堆",
+    emoji: "🎁",
+    price: { wood: 10, brick: 6 },
+    buyable: true,
+    theme: "christmas",
+  },
+  {
+    id: "sock",
+    name: "聖誕襪",
+    emoji: "🧦",
+    price: { wood: 6 },
+    buyable: true,
+    theme: "christmas",
   },
   { id: "trophy", name: "獎盃庭園", emoji: "🏆", price: {}, buyable: false, effect: "trophy" },
 ];

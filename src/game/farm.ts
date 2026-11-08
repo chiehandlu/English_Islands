@@ -1,4 +1,12 @@
-import { DECOR_KINDS, PET_KINDS, STARTER_PET, getDecorKind, getPetKind } from "@/content/farm";
+import {
+  DECOR_KINDS,
+  PET_KINDS,
+  STARTER_PET,
+  getDecorKind,
+  getPetKind,
+  getTheme,
+  getWeather,
+} from "@/content/farm";
 import type {
   FarmState,
   FeedItem,
@@ -7,6 +15,8 @@ import type {
   ItemId,
   OwnedPet,
   PlacedDecor,
+  PlantSpec,
+  WeatherId,
 } from "./types";
 
 /**
@@ -33,6 +43,8 @@ export const FARM_CONFIG = {
   adultAt: 30,
   /** 拆裝飾退回的比例 */
   refundRatio: 0.5,
+  /** 每棵植物每天最多照顧幾次 */
+  plantCarePerDay: 3,
 };
 
 export const EMPTY_INVENTORY: Inventory = {
@@ -73,6 +85,8 @@ export function createFarmState(today: string): FarmState {
     reviewCleared: 0,
     lifetimeCoins: 0,
     runsHistory: {},
+    weather: "sunny",
+    weatherOwned: ["sunny"],
   };
 }
 
@@ -154,6 +168,15 @@ export function ownsPetKind(farm: FarmState, kindId: string): boolean {
   return farm.pets.some((p) => p.kind === kindId);
 }
 
+// ---------- 主題 ----------
+
+/** 主題在對應單元完成（領過 unit:uNN 里程碑）後開放；沒有主題的東西一直都開放。 */
+export function themeUnlocked(farm: Pick<FarmState, "claimed">, themeId?: string): boolean {
+  if (!themeId) return true;
+  const theme = getTheme(themeId);
+  return Boolean(theme && farm.claimed.includes(`unit:${theme.unlockUnit}`));
+}
+
 export type PetStage = "baby" | "teen" | "adult";
 
 export function petStage(growth: number): PetStage {
@@ -182,7 +205,8 @@ export type FarmError =
   | "not_found"
   | "slot_taken"
   | "locked"
-  | "not_buyable";
+  | "not_buyable"
+  | "grown";
 
 export type FarmResult = { ok: true; state: GameState } | { ok: false; error: FarmError };
 
@@ -220,6 +244,7 @@ export function adoptPet(state: GameState, kindId: string, today: string): FarmR
   const kind = getPetKind(kindId);
   if (!kind || !kind.price) return { ok: false, error: "not_buyable" };
   const farm = state.farm;
+  if (!themeUnlocked(farm, kind.theme)) return { ok: false, error: "locked" };
   if (kind.requiresDecor && !hasDecor(farm, kind.requiresDecor))
     return { ok: false, error: "need_decor" };
   if (!canAfford(farm.inventory, kind.price)) return { ok: false, error: "not_enough" };
@@ -243,6 +268,7 @@ export function buyDecor(state: GameState, kindId: string, today: string): FarmR
   if (kind.maxCount !== undefined && countDecor(farm, kindId) >= kind.maxCount)
     return { ok: false, error: "max_count" };
   if (kind.requiresUnitComplete && !landAvailable(farm)) return { ok: false, error: "locked" };
+  if (!themeUnlocked(farm, kind.theme)) return { ok: false, error: "locked" };
   if (!canAfford(farm.inventory, kind.price)) return { ok: false, error: "not_enough" };
   const inventory = subtractItems(farm.inventory, kind.price);
   if (kind.effect === "land") {
@@ -270,6 +296,7 @@ export function buyDecor(state: GameState, kindId: string, today: string): FarmR
   const slot = freeDecorSlot(farm);
   if (slot === null) return { ok: false, error: "decor_full" };
   const placed: PlacedDecor = { id: newId("decor", today), kind: kindId, slot };
+  if (kind.plant) Object.assign(placed, { growth: 0, caredOn: today, caredToday: 0 });
   return {
     ok: true,
     state: withFarm(state, { ...farm, inventory, decor: [...farm.decor, placed] }),
@@ -406,6 +433,7 @@ export function affordableNow(farm: FarmState): { pets: string[]; decor: string[
     (k) =>
       k.price &&
       canAfford(farm.inventory, k.price) &&
+      themeUnlocked(farm, k.theme) &&
       (!k.requiresDecor || hasDecor(farm, k.requiresDecor)) &&
       farm.pets.length < petCapacity(farm),
   ).map((k) => k.id);
@@ -415,7 +443,104 @@ export function affordableNow(farm: FarmState): { pets: string[]; decor: string[
       canAfford(farm.inventory, d.price) &&
       (d.maxCount === undefined || countDecor(farm, d.id) < d.maxCount) &&
       (!d.requiresUnitComplete || landAvailable(farm)) &&
+      themeUnlocked(farm, d.theme) &&
       (d.effect === "barn_plus_3" || d.effect === "land" || freeDecorSlot(farm) !== null),
   ).map((d) => d.id);
   return { pets, decor };
+}
+
+// ---------- 植物 ----------
+
+export type PlantStage = 0 | 1 | 2;
+export const PLANT_STAGE_LABELS = ["種子", "發芽", "長大了"] as const;
+
+export function plantStage(growth: number, spec: PlantSpec): PlantStage {
+  if (growth >= spec.grownAt) return 2;
+  if (growth >= spec.sproutAt) return 1;
+  return 0;
+}
+
+/** 這株植物現在長什麼樣子（emoji）。 */
+export function plantLook(decor: Pick<PlacedDecor, "growth">, spec: PlantSpec): string {
+  return spec.stages[plantStage(decor.growth ?? 0, spec)];
+}
+
+export function caredToday(decor: PlacedDecor, today: string): number {
+  return decor.caredOn === today ? (decor.caredToday ?? 0) : 0;
+}
+
+/** 照顧植物：用 1 個穀物或蔬菜，長 1 格；每天最多 plantCarePerDay 次，長大了就不用再照顧。 */
+export function carePlant(
+  state: GameState,
+  decorId: string,
+  item: FeedItem,
+  today: string,
+): FarmResult {
+  const farm = state.farm;
+  const decor = farm.decor.find((d) => d.id === decorId);
+  const spec = decor ? getDecorKind(decor.kind)?.plant : undefined;
+  if (!decor || !spec) return { ok: false, error: "not_found" };
+  const growth = decor.growth ?? 0;
+  if (growth >= spec.grownAt) return { ok: false, error: "grown" };
+  if (farm.inventory[item] <= 0) return { ok: false, error: "no_food" };
+  const done = caredToday(decor, today);
+  if (done >= FARM_CONFIG.plantCarePerDay) return { ok: false, error: "fed_enough" };
+  const updated: PlacedDecor = {
+    ...decor,
+    growth: growth + 1,
+    caredOn: today,
+    caredToday: done + 1,
+  };
+  return {
+    ok: true,
+    state: withFarm(state, {
+      ...farm,
+      inventory: subtractItems(farm.inventory, { [item]: 1 }),
+      decor: farm.decor.map((d) => (d.id === decorId ? updated : d)),
+    }),
+  };
+}
+
+/** 今天還可以照顧的植物（還沒長大、還沒照顧滿）。 */
+export function plantsToCare(farm: FarmState, today: string): PlacedDecor[] {
+  return farm.decor.filter((d) => {
+    const spec = getDecorKind(d.kind)?.plant;
+    return (
+      spec &&
+      d.slot !== null &&
+      (d.growth ?? 0) < spec.grownAt &&
+      caredToday(d, today) < FARM_CONFIG.plantCarePerDay
+    );
+  });
+}
+
+// ---------- 天氣 ----------
+
+export function ownsWeather(farm: Pick<FarmState, "weatherOwned">, id: WeatherId): boolean {
+  return id === "sunny" || (farm.weatherOwned ?? []).includes(id);
+}
+
+/** 買一種天氣：買了就馬上換成它。 */
+export function buyWeather(state: GameState, id: WeatherId): FarmResult {
+  const kind = getWeather(id);
+  if (!kind) return { ok: false, error: "not_found" };
+  const farm = state.farm;
+  if (ownsWeather(farm, id)) return { ok: false, error: "already_owned" };
+  if (!canAfford(farm.inventory, kind.price)) return { ok: false, error: "not_enough" };
+  return {
+    ok: true,
+    state: withFarm(state, {
+      ...farm,
+      inventory: subtractItems(farm.inventory, kind.price),
+      weatherOwned: [...(farm.weatherOwned ?? ["sunny"]), id],
+      weather: id,
+    }),
+  };
+}
+
+/** 換成已經有的天氣（不花錢）。 */
+export function setWeather(state: GameState, id: WeatherId): FarmResult {
+  if (!getWeather(id)) return { ok: false, error: "not_found" };
+  if (!ownsWeather(state.farm, id)) return { ok: false, error: "locked" };
+  return { ok: true, state: withFarm(state, { ...state.farm, weather: id }) };
 }

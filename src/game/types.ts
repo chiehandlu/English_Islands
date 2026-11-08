@@ -184,6 +184,37 @@ export interface PetKind {
   /** 要先蓋好的裝飾 id */
   requiresDecor?: string;
   achievement?: Achievement;
+  /** 主題寵物：要先解鎖這個主題（完成對應的單元） */
+  theme?: string;
+}
+
+/** 一組主題（萬聖節、聖誕節…）：完成某個單元就開放，裡面有專屬寵物、裝飾、植物 */
+export interface ThemeKind {
+  id: string;
+  name: string;
+  emoji: string;
+  /** 完成這個單元（三座課程島全亮）就解鎖 */
+  unlockUnit: string;
+}
+
+/** 植物：種在裝飾格，用穀物或蔬菜照顧，從種子長到結果 */
+export interface PlantSpec {
+  /** 三個階段的樣子：種子、發芽、長大 */
+  stages: [string, string, string];
+  /** 照顧幾次進入發芽、長大 */
+  sproutAt: number;
+  grownAt: number;
+}
+
+export type WeatherId = "sunny" | "rain" | "snow" | "thunder";
+
+/** 一種天氣：買一次之後隨時可以切換，整個群島都會變 */
+export interface WeatherKind {
+  id: WeatherId;
+  name: string;
+  emoji: string;
+  /** 晴天免費，其他要買一次 */
+  price: Partial<Inventory>;
 }
 
 /** 一種裝飾（資料，在 content/farm.ts） */
@@ -201,6 +232,10 @@ export interface DecorKind {
   /** 蓋了之後可以領養的寵物 id（顯示用） */
   unlocksPet?: string;
   buyable: boolean;
+  /** 主題裝飾：要先解鎖這個主題 */
+  theme?: string;
+  /** 有這個欄位的是植物：種下去之後要照顧才會長大 */
+  plant?: PlantSpec;
 }
 
 export interface OwnedPet {
@@ -220,6 +255,10 @@ export interface PlacedDecor {
   kind: string;
   /** 0–11 在外圈，null 還沒放（只有成就送的會這樣） */
   slot: number | null;
+  /** 植物才有：照顧了幾次、最後一次照顧的日期、那天照顧了幾次 */
+  growth?: number;
+  caredOn?: string;
+  caredToday?: number;
 }
 
 export interface FarmState {
@@ -243,6 +282,9 @@ export interface FarmState {
   lifetimeCoins: number;
   /** 最近 14 天每天的挑戰次數，家長頁用 */
   runsHistory: Record<string, number>;
+  /** 現在的天氣，與已經買過的天氣（晴天一開始就有） */
+  weather: WeatherId;
+  weatherOwned: WeatherId[];
 }
 
 /** 每一題累計答對／答錯幾次，複習島用來挑「常錯的」 */

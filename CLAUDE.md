@@ -57,12 +57,12 @@ src/
   app/               # 只有一個路由 /；畫面由 uiStore.view 切換（home / play / report）
   components/
     App.tsx          # view 切換；StartCard（首頁）、ReportView（家長頁）
-    scene/           # R3F 3D 元件：World、Islands、FarmIsland、Bridges、FlowArcs、Walkers、CameraRig、palette
-    hud/             # 疊在 canvas 上的 DOM 介面：TopBar、IndexPanel、DetailCard、QuizPanel、FarmCard、RewardList
+    scene/           # R3F 3D 元件：World、Islands、FarmIsland、Bridges、FlowArcs、Walkers、Weather、CameraRig、palette
+    hud/             # 疊在 canvas 上的 DOM 介面：TopBar、IndexPanel、DetailCard、QuizPanel、FarmCard（寵物／植物／商店／天氣／圖鑑）、RewardList
   game/              # 純 TS 遊戲規則：types、engine（星等／解鎖）、quiz（出題／判題）、
                      #   review（錯題袋、常錯統計、複習題組）、rewards（金幣／掉落／每日上限／里程碑）、
                      #   farm（領養／餵食／裝飾／上限）、dayClock
-  scene/             # 純 TS 場景數學：六角座標、小人狀態機、燈光內插、farm（農場 19／37 格與寵物漫步）
+  scene/             # 純 TS 場景數學：六角座標、小人狀態機、燈光內插、farm（農場 19／37 格與寵物漫步）、weather（天色、雨雪、閃電）
   content/
     units/           # 內容資料：每單元一個 uNN.json；index.ts 列出所有單元
     farm.ts          # 農場圖鑑：寵物、裝飾、價格、掉落表（資料，改數字不用動程式）
@@ -88,8 +88,9 @@ docs/
 4. **進度只存五樣**：`player`、`progress`（每棟 `stars`/`best`/`attempts`）、`mistakes`（錯題與下次複習日）、`questionStats`（每題累計 `wrong`/`right`/`lastWrong`）、`farm`（背包、寵物、裝飾、每日計數、已領里程碑）。島與單元的狀態一律由此推導。星星只升不降，農場的東西只進不出（拆裝飾退一半材料是唯一例外）。「常錯題」＝`troubleScore = wrong×2 − right > 0`，答對會慢慢抵銷。
 5. **星等**：答對率 ≥ 0.9 三顆、≥ 0.7 兩顆、≥ 0.5 一顆；一顆星以上＝亮燈。改門檻只改 `engine.ts` 的 `starsForRatio` 與測試。
    **獎勵**：金幣 1/2/3、首次全對 +2、每棟每天前 5 次全額；材料每答對一題掉一個，依「島 × 題型」查 `content/farm.ts` 的 `dropFor`。數字都在 `rewards.ts` 的 `REWARD_CONFIG` 與 `farm.ts` 的 `FARM_CONFIG`。結算順序固定：`recordResult` → `applyRunRewards` → `claimMilestones`（`gameStore.finishQuiz`）。
+   **主題／植物／天氣**：每完成一課開放一組主題（`content/farm.ts` 的 `THEMES`，`unlockUnit` 對應單元；萬聖節＝Unit 3、聖誕節＝Unit 4），主題寵物、裝飾、植物用 `theme` 標記，規則在 `farm.ts` 的 `themeUnlocked`。植物是有 `plant` 欄位的裝飾（共用外圈格），用 🌾／🥕 施肥長大（`carePlant`）。天氣存在 `farm.weather`／`weatherOwned`，買一次隨時切換，畫面效果在 `scene/weather.ts` 與 `components/scene/Weather.tsx`，整個群島一起變。
    **農場**：19 格＝島上展示 6 隻、裝飾 12 格；小屋 6（擴建 +3 × 2）。「第二圈土地」只能買一次（80 🪙 + 60 🪵 + 40 🧱，完成一個單元後開放）→ 37 格＝展示 12、裝飾 24。再大就會亂，不加第三次。傳說寵物只靠成就。掉落固定不隨機；新手送一隻雞。
-6. **存檔相容**：改動 `GameState` 結構時，調升 `gameStore.ts` 的 `persist.version`（目前 4）並更新 `migrate`。小朋友的進度在 iPad 的 localStorage 裡，弄壞 migrate 就等於清掉他的星星。
+6. **存檔相容**：改動 `GameState` 結構時，調升 `gameStore.ts` 的 `persist.version`（目前 5）並更新 `migrate`。小朋友的進度在 iPad 的 localStorage 裡，弄壞 migrate 就等於清掉他的星星。
 7. **Hydration**：讀取 `gameStore` 的頁面要先用 `useHasHydrated()` 判斷。3D 世界用 `next/dynamic`（`ssr: false`）載入。
 8. **選取**：島、建築、協作線、清單的點擊一律呼叫 `select()`，不要另存選取狀態。答題面板的開關存在 `uiStore.quiz`，首頁／島嶼／家長頁的切換存在 `uiStore.view`。
 9. **單一路由**：不新增 `app/` 路由、不用 `next/link` 或 `router.push`。靜態主機可能把網站放在子路徑（例如 Claude artifact 的 `/_f/<版本>/`），只有單一 `index.html` 加相對資源路徑才能在任何地方跑。
@@ -123,7 +124,8 @@ docs/
 1. Jay 把課本／評量整理成 MD，丟進 Claude 專案「英文島」，請它產生 `uNN.json`（專案指令會要求先說明怎麼拆房子）。
 2. 存成 `src/content/units/uNN.json`，在 `src/content/units/index.ts` 加一行。
 3. `npm test`：`content.test.ts` 會抓 id 重複、棟數、題數、選項數、拼字字元、閱讀 match 等問題；修內容而不是改測試。
-4. `npm run build` 確認過，commit、push `main`，Cloudflare 約 40 秒後上線。iPad 重新整理即可，舊存檔不受影響。
+4. （選擇性）想讓這課帶一組新主題，就在 `content/farm.ts` 的 `THEMES` 加一筆並加主題寵物／裝飾／植物；這部分是遊戲資料，不經過 Claude 專案。
+5. `npm run build` 確認過，commit、push `main`，Cloudflare 約 40 秒後上線。iPad 重新整理即可，舊存檔不受影響。
 
 目前有 Unit 3「People in Town」（11 棟人寫）和 Unit 4「Getting Together」（12 棟人寫），各加 1 棟拼字練習＋複習島 3 棟。
 
@@ -136,7 +138,7 @@ docs/
 
 ## 驗證方式
 
-- 單元測試：`npm test`（65 個測試：引擎、出題、錯題／常錯、獎勵、農場、場景幾何、內容規則）。
+- 單元測試：`npm test`（74 個測試：引擎、出題、錯題／常錯、獎勵、農場（含主題、植物、天氣）、場景幾何與天氣、內容規則）。
 - 端對端：`scripts/e2e/review.py`（Playwright + headless Chrome，`BASE=<靜態主機網址> python3 scripts/e2e/review.py`）。會走完「拼字練習故意錯 3 題 → 點亮三座島 → 複習島開放 → 文法複習三星」，印出 localStorage 裡的 `questionStats`、`mistakes`、背包。headless 用 swiftshader 很慢，所以腳本用 `dispatch_event("click")`、藏起 canvas；同 prompt 的題目要用畫面上的選項／字卡去分辨。
 - 真機：iPad Safari 開正式網址；語音要實際點一下才會響。
 
@@ -149,6 +151,8 @@ docs/
 - [x] 獎勵機制：金幣與材料、每日上限、里程碑、農場島（寵物、商店、圖鑑、裝飾、餵食成長、第二圈土地）
 - [x] 拼字練習（聽寫）、每題對錯統計、複習島（常錯題優先，三島全亮才開放）
 - [x] 部署到 Cloudflare Pages，push 自動更新
+- [x] Unit 4（Getting Together）
+- [x] 農場植物（種子施肥長大）、每課一組主題（萬聖節、聖誕節）、天氣（雨、雪、打雷，整個群島）
 
 ## Backlog 與發想（還沒做，照 Jay 提過的順序）
 

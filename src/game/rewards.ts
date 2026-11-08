@@ -1,4 +1,4 @@
-import { COMMON_ITEM, RARE_ITEM, dropFor, getPetKind } from "@/content/farm";
+import { COMMON_ITEM, RARE_ITEM, THEMES, dropFor, getPetKind } from "@/content/farm";
 import { ISLANDS, UNITS, coreIslandsOfUnit } from "@/content/islands";
 import { isLit, islandComplete, starsOf, unitComplete } from "./engine";
 import { addItems, grantDecor, grantPet, ownsPetKind } from "./farm";
@@ -286,6 +286,14 @@ export function claimMilestones(
           id: `unit:${unit.id}`,
           label: `Unit ${unit.number} 完成！`,
           gained: REWARD_CONFIG.unitCompleteFallback,
+        });
+      }
+      // 這個單元帶的主題（萬聖節、聖誕節…）在農場商店開放
+      for (const theme of THEMES.filter((t) => t.unlockUnit === unit.id)) {
+        events.push({
+          id: `theme:${theme.id}`,
+          label: `${theme.emoji} ${theme.name}主題開放了！到農場商店看看`,
+          gained: {},
         });
       }
     }

@@ -165,6 +165,9 @@ describe("claimMilestones", () => {
     const ids = events.map((e) => e.id);
     for (const island of coreIslandsOfUnit(unit)) expect(ids).toContain(`island:${island.id}`);
     expect(ids).toContain(`unit:${unit.id}`);
+    // Unit 3 完成會宣布萬聖節主題開放
+    expect(ids).toContain("theme:halloween");
+    expect(ids).not.toContain("theme:christmas");
     expect(state.farm.pets.some((p) => p.kind === "unicorn")).toBe(true);
     expect(state.farm.inventory.key).toBe(3 * (REWARD_CONFIG.islandComplete.key ?? 0));
     // 複習島還沒碰，不算進單元完成也不給島獎勵

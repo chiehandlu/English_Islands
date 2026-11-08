@@ -5,7 +5,7 @@ import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { CanvasTexture, type Group, type Mesh, SRGBColorSpace, type Sprite } from "three";
 import { getDecorKind, getPetKind } from "@/content/farm";
-import { petStage } from "@/game/farm";
+import { plantLook, plantStage, petStage } from "@/game/farm";
 import { rng } from "@/game/quiz";
 import type { OwnedPet, PlacedDecor } from "@/game/types";
 import {
@@ -252,10 +252,53 @@ function Decor({ decor }: { decor: PlacedDecor & { slot: number } }) {
     if (kind.effect === "bell") ringBell();
     else select({ kind: "farm", id: "farm" });
   };
+  // 植物照長到哪一階段換樣子；沒有專屬模型的（主題裝飾）用 emoji 立牌
+  if (kind.plant) {
+    const stage = plantStage(decor.growth ?? 0, kind.plant);
+    return (
+      <group position={[x, GROUND_Y, z]} onClick={onClick}>
+        <mesh position={[0, 0.04, 0]} receiveShadow>
+          <cylinderGeometry args={[0.45, 0.45, 0.08, 6]} />
+          <meshStandardMaterial color={SCENE_COLORS.soil} />
+        </mesh>
+        <EmojiStand emoji={plantLook(decor, kind.plant)} size={[0.5, 0.75, 1.05][stage]} />
+      </group>
+    );
+  }
   return (
     <group position={[x, GROUND_Y, z]} onClick={onClick}>
-      <DecorShape id={kind.id} />
+      {SHAPED_DECOR.has(kind.id) ? (
+        <DecorShape id={kind.id} />
+      ) : (
+        <EmojiStand emoji={kind.emoji} size={0.95} />
+      )}
     </group>
+  );
+}
+
+/** 有自己 3D 模型的裝飾；其他的畫成 emoji 立牌。 */
+const SHAPED_DECOR = new Set([
+  "flag",
+  "fence",
+  "flowers",
+  "path",
+  "tree",
+  "scarecrow",
+  "bell",
+  "pond",
+  "slide",
+  "stable",
+  "windmill",
+  "trophy",
+]);
+
+function EmojiStand({ emoji, size }: { emoji: string; size: number }) {
+  const texture = useMemo(() => emojiTexture(emoji), [emoji]);
+  if (!texture) return null;
+  return (
+    <sprite position={[0, size / 2, 0]} scale={[size, size, 1]}>
+      <spriteMaterial map={texture} transparent depthWrite={false} />
+    </sprite>
   );
 }
 

@@ -6,6 +6,7 @@ import { Canvas } from "@react-three/fiber";
 import { completionRatio } from "@/game/engine";
 import { dayHour } from "@/game/dayClock";
 import { lerpColor, lightingAt } from "@/scene/lighting";
+import { WEATHER_LOOKS, weatherSky } from "@/scene/weather";
 import { select, useSelection } from "@/lib/selection";
 import { useGameStore } from "@/store/gameStore";
 import { useUiStore } from "@/store/uiStore";
@@ -15,6 +16,7 @@ import { FarmIsland } from "./FarmIsland";
 import { FlowArcs } from "./FlowArcs";
 import { Islands } from "./Islands";
 import { Walkers } from "./Walkers";
+import { Weather } from "./Weather";
 import { SCENE_COLORS } from "./palette";
 
 const MD_BREAKPOINT = 768;
@@ -53,6 +55,8 @@ export default function World() {
   const rightInset = rightInsetFor(width, panelOpen);
   const leftInset = leftInsetFor(width, selection !== null);
   const light = lightingAt(dayHour(completionRatio(game)));
+  const weather = game.farm.weather ?? "sunny";
+  const sky = weatherSky(light.sky, weather);
   const sunDistance = 40;
   // 名牌（drei Html）掛在自己管理的圖層：預設掛在 Canvas 父層，離開頁面時會拋 removeChild 錯誤
   const labelLayer = useRef<HTMLDivElement>(null!);
@@ -67,15 +71,15 @@ export default function World() {
         camera={{ position: CAMERA_OFFSET.toArray(), zoom: 30, near: 0.1, far: 500 }}
         onPointerMissed={() => select(null)}
       >
-        <color attach="background" args={[light.sky]} />
+        <color attach="background" args={[sky]} />
         {/* 環境光只帶一點天色，避免整個場景被染色 */}
         <hemisphereLight
-          args={[lerpColor("#ffffff", light.sky, 0.3), SCENE_COLORS.sand, light.ambient]}
+          args={[lerpColor("#ffffff", sky, 0.3), SCENE_COLORS.sand, light.ambient]}
         />
         <directionalLight
           castShadow
           color={light.sun}
-          intensity={light.sunIntensity}
+          intensity={light.sunIntensity * WEATHER_LOOKS[weather].sunScale}
           position={[
             -sunDistance * Math.cos(light.elevation),
             sunDistance * Math.sin(light.elevation),
@@ -101,6 +105,7 @@ export default function World() {
         <FarmIsland selection={selection} showLabels={showLabels} labelLayer={labelLayer} />
         {showFlows && <FlowArcs selection={selection} />}
         <Walkers selection={selection} paused={paused} showWalkers={showWalkers} />
+        <Weather weather={weather} paused={paused} />
         <MapControls makeDefault enableRotate={false} minZoom={12} maxZoom={180} />
         <CameraRig selection={selection} rightInset={rightInset} leftInset={leftInset} />
       </Canvas>

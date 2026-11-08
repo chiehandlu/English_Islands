@@ -8,15 +8,19 @@ import {
   ITEM_META,
   PET_KINDS,
   TIER_LABELS,
+  WEATHER_KINDS,
   getDecorKind,
   getPetKind,
+  getTheme,
 } from "@/content/farm";
-import { ISLANDS } from "@/content/islands";
+import { ISLANDS, getUnit } from "@/content/islands";
 import { islandStatus } from "@/game/engine";
 import {
   FARM_CONFIG,
+  PLANT_STAGE_LABELS,
   STAGE_LABELS,
   barnCapacity,
+  caredToday,
   countDecor,
   decorSlotCount,
   displaySlotCount,
@@ -26,17 +30,21 @@ import {
   hasDecor,
   landAvailable,
   missingFor,
+  ownsWeather,
   petCapacity,
   petStage,
   petsInBarn,
   petsOutside,
+  plantLook,
+  plantStage,
+  themeUnlocked,
 } from "@/game/farm";
 import { toDateString } from "@/game/review";
 import type { FeedItem, Inventory, IslandKind, ItemId, OwnedPet, PetKind } from "@/game/types";
 import { select } from "@/lib/selection";
 import { useGameStore } from "@/store/gameStore";
 
-type Tab = "pets" | "shop" | "dex";
+type Tab = "pets" | "plants" | "shop" | "weather" | "dex";
 
 /** 農場卡：寵物、商店、圖鑑。 */
 export function FarmCard() {
@@ -51,11 +59,13 @@ export function FarmCard() {
         {barnCapacity(farm)}・裝飾 {farm.decor.filter((d) => d.slot !== null).length} /{" "}
         {decorSlotCount(farm)}・{farm.landExpanded ? "37 格" : "19 格"}
       </p>
-      <div role="tablist" className="mt-3 flex gap-1">
+      <div role="tablist" className="mt-3 flex flex-wrap gap-1">
         {(
           [
             ["pets", "寵物"],
+            ["plants", "植物"],
             ["shop", "商店"],
+            ["weather", "天氣"],
             ["dex", "圖鑑"],
           ] as const
         ).map(([key, label]) => (
@@ -73,7 +83,9 @@ export function FarmCard() {
       </div>
       <div className="mt-3">
         {tab === "pets" && <PetsTab />}
+        {tab === "plants" && <PlantsTab onShop={() => setTab("shop")} />}
         {tab === "shop" && <ShopTab />}
+        {tab === "weather" && <WeatherTab />}
         {tab === "dex" && <DexTab />}
       </div>
     </article>
@@ -97,6 +109,27 @@ function PriceChips({ price, inventory }: { price: Partial<Inventory>; inventory
       })}
     </span>
   );
+}
+
+/** 主題小標籤，例如「🎃 萬聖節」。 */
+function ThemeBadge({ theme }: { theme?: string }) {
+  const t = theme ? getTheme(theme) : undefined;
+  if (!t) return null;
+  return (
+    <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-normal text-amber-800">
+      {t.emoji} {t.name}
+    </span>
+  );
+}
+
+/** 主題還沒開放時說要完成哪一課。 */
+function themeLockText(theme?: string): string | null {
+  const t = theme ? getTheme(theme) : undefined;
+  if (!t) return null;
+  const unit = getUnit(t.unlockUnit);
+  return unit
+    ? `完成 Unit ${unit.number}（${unit.title}）三座島全亮，${t.name}主題就會開放`
+    : `${t.name}主題之後的課程會開放`;
 }
 
 /** 「去閱讀島」：挑第一座開放中、還沒全亮的那種島。 */
@@ -267,9 +300,10 @@ function ShopTab() {
         <ul className="mt-2 space-y-2">
           {PET_KINDS.filter((k) => k.price).map((kind) => {
             const missing = missingFor(inv, kind.price!);
+            const themeLocked = !themeUnlocked(farm, kind.theme);
             const needDecor = kind.requiresDecor && !hasDecor(farm, kind.requiresDecor);
             const decor = kind.requiresDecor ? getDecorKind(kind.requiresDecor) : undefined;
-            const ok = !needDecor && Object.keys(missing).length === 0 && !full;
+            const ok = !themeLocked && !needDecor && Object.keys(missing).length === 0 && !full;
             const owned = farm.pets.filter((p) => p.kind === kind.id).length;
             return (
               <li key={kind.id} className="rounded-xl border border-neutral-200 bg-white p-3">
@@ -282,16 +316,20 @@ function ShopTab() {
                         {TIER_LABELS[kind.tier]}・愛吃 {ITEM_META[kind.favorite].emoji}
                         {owned > 0 && `・已有 ${owned}`}
                       </span>
+                      <ThemeBadge theme={kind.theme} />
                     </p>
                     <div className="mt-1">
                       <PriceChips price={kind.price!} inventory={inv} />
                     </div>
-                    {needDecor && decor && (
+                    {themeLocked && (
+                      <p className="mt-1 text-xs text-rose-700">{themeLockText(kind.theme)}</p>
+                    )}
+                    {!themeLocked && needDecor && decor && (
                       <p className="mt-1 text-xs text-rose-700">
                         要先蓋 {decor.emoji} {decor.name}
                       </p>
                     )}
-                    {!needDecor && Object.keys(missing).length > 0 && (
+                    {!themeLocked && !needDecor && Object.keys(missing).length > 0 && (
                       <p className="mt-1 flex flex-wrap items-center gap-1 text-xs text-neutral-600">
                         還差
                         {ITEM_IDS.filter((id) => missing[id]).map((id) => (
@@ -319,74 +357,8 @@ function ShopTab() {
         </ul>
       </section>
 
-      <section>
-        <p className="mono-label">蓋裝飾（用文法島的材料）</p>
-        <ul className="mt-2 space-y-2">
-          {DECOR_KINDS.filter((d) => d.buyable).map((kind) => {
-            const missing = missingFor(inv, kind.price);
-            const count = countDecor(farm, kind.id);
-            const maxed = kind.maxCount !== undefined && count >= kind.maxCount;
-            const takesSlot = kind.effect !== "barn_plus_3" && kind.effect !== "land";
-            const noSlot = takesSlot && freeDecorSlot(farm) === null;
-            const locked = Boolean(kind.requiresUnitComplete) && !landAvailable(farm);
-            const ok = Object.keys(missing).length === 0 && !maxed && !noSlot && !locked;
-            if (kind.effect === "land" && maxed) return null;
-            const unlocks = kind.unlocksPet ? getPetKind(kind.unlocksPet) : undefined;
-            return (
-              <li
-                key={kind.id}
-                className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-3"
-              >
-                <span className="text-3xl">{kind.emoji}</span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold">
-                    {kind.name}
-                    {count > 0 && (
-                      <span className="ml-2 text-xs font-normal text-neutral-500">
-                        已有 {count}
-                      </span>
-                    )}
-                  </p>
-                  <div className="mt-1">
-                    <PriceChips price={kind.price} inventory={inv} />
-                  </div>
-                  <p className="mt-1 text-xs text-neutral-500">
-                    {kind.effect === "barn_plus_3" &&
-                      `小屋容量 +${FARM_CONFIG.barnPerExpansion}，最多兩次`}
-                    {kind.effect === "land" &&
-                      `島長大到 37 格：寵物位 ${FARM_CONFIG.displaySlots} → ${FARM_CONFIG.displaySlotsExpanded}、裝飾位 ${FARM_CONFIG.decorSlots} → ${FARM_CONFIG.decorSlotsExpanded}`}
-                    {kind.effect === "bell" && "點一下，所有寵物跳一下"}
-                    {unlocks && `蓋了才能領養 ${unlocks.emoji} ${unlocks.name}`}
-                  </p>
-                  {Object.keys(missing).length > 0 && (
-                    <p className="mt-1 flex flex-wrap items-center gap-1 text-xs text-neutral-600">
-                      還差
-                      {ITEM_IDS.filter((id) => missing[id]).map((id) => (
-                        <span key={id}>
-                          {ITEM_META[id].emoji} {missing[id]}
-                        </span>
-                      ))}
-                      <GoEarn missing={missing} />
-                    </p>
-                  )}
-                  {noSlot && <p className="mt-1 text-xs text-rose-700">外圈滿了，先拆一件</p>}
-                  {locked && (
-                    <p className="mt-1 text-xs text-rose-700">完成一個單元（三座島全亮）後開放</p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  disabled={!ok}
-                  onClick={() => game.build(kind.id)}
-                  className="btn-primary min-h-10 px-4 py-2 disabled:opacity-30"
-                >
-                  {kind.effect === "barn_plus_3" ? "擴建" : kind.effect === "land" ? "買地" : "蓋"}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      <DecorSection title="種植物（種在外圈，用 🌾／🥕 照顧才會長大）" plants />
+      <DecorSection title="蓋裝飾（用文法島的材料）" plants={false} />
 
       {farm.decor.some((d) => d.slot !== null) && (
         <section>
@@ -407,7 +379,7 @@ function ShopTab() {
                       className="chip min-h-9 disabled:opacity-60"
                       title={fixed ? "成就送的，不能拆" : "拆掉"}
                     >
-                      {kind.emoji} {kind.name}
+                      {kind.plant ? plantLook(d, kind.plant) : kind.emoji} {kind.name}
                       {!fixed && <span className="text-neutral-400">×</span>}
                     </button>
                   </li>
@@ -420,12 +392,240 @@ function ShopTab() {
   );
 }
 
+function DecorSection({ title, plants }: { title: string; plants: boolean }) {
+  const game = useGameStore();
+  const farm = game.farm;
+  const inv = farm.inventory;
+  return (
+    <section>
+      <p className="mono-label">{title}</p>
+      <ul className="mt-2 space-y-2">
+        {DECOR_KINDS.filter((d) => d.buyable && Boolean(d.plant) === plants).map((kind) => {
+          const missing = missingFor(inv, kind.price);
+          const count = countDecor(farm, kind.id);
+          const maxed = kind.maxCount !== undefined && count >= kind.maxCount;
+          const takesSlot = kind.effect !== "barn_plus_3" && kind.effect !== "land";
+          const noSlot = takesSlot && freeDecorSlot(farm) === null;
+          const locked = Boolean(kind.requiresUnitComplete) && !landAvailable(farm);
+          const themeLocked = !themeUnlocked(farm, kind.theme);
+          const ok =
+            Object.keys(missing).length === 0 && !maxed && !noSlot && !locked && !themeLocked;
+          if (kind.effect === "land" && maxed) return null;
+          const unlocks = kind.unlocksPet ? getPetKind(kind.unlocksPet) : undefined;
+          return (
+            <li
+              key={kind.id}
+              className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-3"
+            >
+              <span className="text-3xl">{kind.emoji}</span>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold">
+                  {kind.name}
+                  {count > 0 && (
+                    <span className="ml-2 text-xs font-normal text-neutral-500">已有 {count}</span>
+                  )}
+                  <ThemeBadge theme={kind.theme} />
+                </p>
+                <div className="mt-1">
+                  <PriceChips price={kind.price} inventory={inv} />
+                </div>
+                <p className="mt-1 text-xs text-neutral-500">
+                  {kind.effect === "barn_plus_3" &&
+                    `小屋容量 +${FARM_CONFIG.barnPerExpansion}，最多兩次`}
+                  {kind.effect === "land" &&
+                    `島長大到 37 格：寵物位 ${FARM_CONFIG.displaySlots} → ${FARM_CONFIG.displaySlotsExpanded}、裝飾位 ${FARM_CONFIG.decorSlots} → ${FARM_CONFIG.decorSlotsExpanded}`}
+                  {kind.effect === "bell" && "點一下，所有寵物跳一下"}
+                  {unlocks && `蓋了才能領養 ${unlocks.emoji} ${unlocks.name}`}
+                  {kind.plant &&
+                    `種子 ${kind.plant.stages[0]} → 照顧 ${kind.plant.grownAt} 次長成 ${kind.emoji}`}
+                </p>
+                {themeLocked && (
+                  <p className="mt-1 text-xs text-rose-700">{themeLockText(kind.theme)}</p>
+                )}
+                {!themeLocked && Object.keys(missing).length > 0 && (
+                  <p className="mt-1 flex flex-wrap items-center gap-1 text-xs text-neutral-600">
+                    還差
+                    {ITEM_IDS.filter((id) => missing[id]).map((id) => (
+                      <span key={id}>
+                        {ITEM_META[id].emoji} {missing[id]}
+                      </span>
+                    ))}
+                    <GoEarn missing={missing} />
+                  </p>
+                )}
+                {noSlot && <p className="mt-1 text-xs text-rose-700">外圈滿了，先拆一件</p>}
+                {locked && (
+                  <p className="mt-1 text-xs text-rose-700">完成一個單元（三座島全亮）後開放</p>
+                )}
+              </div>
+              <button
+                type="button"
+                disabled={!ok}
+                onClick={() => game.build(kind.id)}
+                className="btn-primary min-h-10 px-4 py-2 disabled:opacity-30"
+              >
+                {kind.effect === "barn_plus_3"
+                  ? "擴建"
+                  : kind.effect === "land"
+                    ? "買地"
+                    : kind.plant
+                      ? "種"
+                      : "蓋"}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
+function PlantsTab({ onShop }: { onShop: () => void }) {
+  const game = useGameStore();
+  const farm = game.farm;
+  const today = toDateString(new Date());
+  const planted = farm.decor.filter((d) => d.slot !== null && getDecorKind(d.kind)?.plant);
+  if (planted.length === 0)
+    return (
+      <div className="space-y-2 text-sm text-neutral-600">
+        <p>還沒有種植物。到商店買種子，種在農場外圈，照顧幾次就會長大。</p>
+        <button type="button" onClick={onShop} className="chip min-h-10 px-3">
+          去商店 ›
+        </button>
+      </div>
+    );
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-neutral-500">
+        肥料：🌾 {farm.inventory.grain}・🥕 {farm.inventory.veg}。每棵每天最多照顧{" "}
+        {FARM_CONFIG.plantCarePerDay} 次。
+      </p>
+      {planted.map((d) => {
+        const kind = getDecorKind(d.kind)!;
+        const spec = kind.plant!;
+        const growth = d.growth ?? 0;
+        const stage = plantStage(growth, spec);
+        const grown = stage === 2;
+        const done = caredToday(d, today);
+        return (
+          <div key={d.id} className="rounded-xl border border-neutral-200 bg-white p-3">
+            <div className="flex items-center gap-3">
+              <span className={["text-2xl", "text-3xl", "text-4xl"][stage]}>
+                {plantLook(d, spec)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold">
+                  {kind.name}
+                  <ThemeBadge theme={kind.theme} />
+                </p>
+                <p className="text-xs text-neutral-500">
+                  {PLANT_STAGE_LABELS[stage]}
+                  {grown
+                    ? "・🏅"
+                    : `・再照顧 ${spec.grownAt - growth} 次・今天 ${done} / ${FARM_CONFIG.plantCarePerDay}`}
+                </p>
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-200">
+                  <div
+                    className="h-full rounded-full bg-lime-500 transition-all"
+                    style={{ width: `${Math.min(100, (growth / spec.grownAt) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+            {!grown && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {(["grain", "veg"] as const).map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    disabled={farm.inventory[item] <= 0 || done >= FARM_CONFIG.plantCarePerDay}
+                    onClick={() => game.care(d.id, item)}
+                    className="chip min-h-10 px-3 disabled:opacity-40"
+                  >
+                    施肥 {ITEM_META[item].emoji}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function WeatherTab() {
+  const game = useGameStore();
+  const farm = game.farm;
+  const inv = farm.inventory;
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-neutral-500">買過的天氣隨時可以換，整個群島都會一起變。</p>
+      <ul className="grid grid-cols-2 gap-2">
+        {WEATHER_KINDS.map((w) => {
+          const owned = ownsWeather(farm, w.id);
+          const current = (farm.weather ?? "sunny") === w.id;
+          const missing = missingFor(inv, w.price);
+          const canBuy = Object.keys(missing).length === 0;
+          return (
+            <li
+              key={w.id}
+              data-current={current}
+              className="rounded-xl border border-neutral-200 bg-white p-3 text-center data-[current=true]:border-accent"
+            >
+              <p className="text-4xl">{w.emoji}</p>
+              <p className="mt-1 font-bold">{w.name}</p>
+              {owned ? (
+                <button
+                  type="button"
+                  disabled={current}
+                  onClick={() => game.setWeather(w.id)}
+                  className="chip mt-2 min-h-10 px-4 disabled:opacity-60"
+                >
+                  {current ? "現在" : "換成這個"}
+                </button>
+              ) : (
+                <>
+                  <div className="mt-1">
+                    <PriceChips price={w.price} inventory={inv} />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!canBuy}
+                    onClick={() => game.buyWeather(w.id)}
+                    className="btn-primary mt-2 min-h-10 px-4 py-2 disabled:opacity-30"
+                  >
+                    買
+                  </button>
+                  {!canBuy && (
+                    <p className="mt-1 flex flex-wrap items-center justify-center gap-1 text-xs text-neutral-600">
+                      還差
+                      {ITEM_IDS.filter((id) => missing[id]).map((id) => (
+                        <span key={id}>
+                          {ITEM_META[id].emoji} {missing[id]}
+                        </span>
+                      ))}
+                      <GoEarn missing={missing} />
+                    </p>
+                  )}
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 function DexTab() {
   const farm = useGameStore((s) => s.farm);
   const owned = new Map<string, OwnedPet[]>();
   for (const p of farm.pets) owned.set(p.kind, [...(owned.get(p.kind) ?? []), p]);
   const howTo = (kind: PetKind) => {
     if (kind.achievement) return ACHIEVEMENT_LABELS[kind.achievement];
+    const theme = kind.theme ? getTheme(kind.theme) : undefined;
+    if (theme && !themeUnlocked(farm, kind.theme)) return `${theme.emoji} ${theme.name}主題`;
     const decor = kind.requiresDecor ? getDecorKind(kind.requiresDecor) : undefined;
     return decor ? `商店領養，要先蓋${decor.name}` : "商店領養";
   };

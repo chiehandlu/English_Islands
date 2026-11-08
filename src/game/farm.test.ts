@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { DECOR_KINDS, PET_KINDS } from "@/content/farm";
+import { DECOR_KINDS, PET_KINDS, THEMES, WEATHER_KINDS } from "@/content/farm";
+import { UNITS } from "@/content/islands";
 import { createInitialState } from "./engine";
 import {
   FARM_CONFIG,
   adoptPet,
   affordableNow,
   buyDecor,
+  buyWeather,
+  carePlant,
   decorSlotCount,
   displaySlotCount,
   feedPet,
@@ -13,9 +16,13 @@ import {
   missingFor,
   petCapacity,
   petStage,
+  plantStage,
+  plantsToCare,
   removeDecor,
   sendOutside,
   setPetSlot,
+  setWeather,
+  themeUnlocked,
 } from "./farm";
 import type { GameState, Inventory } from "./types";
 
@@ -161,5 +168,100 @@ describe("farm", () => {
       if (p.requiresDecor) expect(DECOR_KINDS.some((d) => d.id === p.requiresDecor)).toBe(true);
       expect(Boolean(p.price) !== Boolean(p.achievement)).toBe(true);
     }
+  });
+
+  it("keeps themed pets and decor locked until their unit is complete", () => {
+    const s = rich(createInitialState(DAY), { coin: 200, page: 100, key: 10, wood: 50, brick: 50 });
+    expect(themeUnlocked(s.farm, "halloween")).toBe(false);
+    expect(adoptPet(s, "bat", DAY)).toEqual({ ok: false, error: "locked" });
+    expect(buyDecor(s, "web", DAY)).toEqual({ ok: false, error: "locked" });
+    expect(affordableNow(s.farm).pets).not.toContain("bat");
+    const done = { ...s, farm: { ...s.farm, claimed: ["unit:u03"] } };
+    expect(themeUnlocked(done.farm, "halloween")).toBe(true);
+    expect(themeUnlocked(done.farm, "christmas")).toBe(false);
+    expect(adoptPet(done, "bat", DAY).ok).toBe(true);
+    expect(buyDecor(done, "web", DAY).ok).toBe(true);
+    expect(adoptPet(done, "penguin", DAY)).toEqual({ ok: false, error: "locked" });
+  });
+
+  it("grows a plant from seed with up to three cares a day", () => {
+    let s = rich(createInitialState(DAY), { coin: 10, grain: 20 });
+    const planted = buyDecor(s, "tulip", DAY);
+    expect(planted.ok).toBe(true);
+    if (!planted.ok) return;
+    s = planted.state;
+    const tulip = s.farm.decor.at(-1)!;
+    expect(tulip).toMatchObject({ kind: "tulip", growth: 0, slot: 0 });
+    const spec = DECOR_KINDS.find((d) => d.id === "tulip")!.plant!;
+    for (let i = 0; i < FARM_CONFIG.plantCarePerDay; i++) {
+      const r = carePlant(s, tulip.id, "grain", DAY);
+      expect(r.ok).toBe(true);
+      if (r.ok) s = r.state;
+    }
+    expect(carePlant(s, tulip.id, "grain", DAY)).toEqual({ ok: false, error: "fed_enough" });
+    expect(plantsToCare(s.farm, DAY)).toHaveLength(0);
+    expect(plantStage(s.farm.decor.at(-1)!.growth!, spec)).toBe(1);
+    // 隔天再照顧三次就長大，之後不用再照顧
+    const NEXT = "2026-11-09";
+    expect(plantsToCare(s.farm, NEXT)).toHaveLength(1);
+    for (let i = 0; i < 3; i++) {
+      const r = carePlant(s, tulip.id, "grain", NEXT);
+      if (r.ok) s = r.state;
+    }
+    expect(plantStage(s.farm.decor.at(-1)!.growth!, spec)).toBe(2);
+    expect(carePlant(s, tulip.id, "grain", NEXT)).toEqual({ ok: false, error: "grown" });
+    expect(s.farm.inventory.grain).toBe(20 - 3 - spec.grownAt);
+  });
+
+  it("refuses to care without food and only for plants", () => {
+    const s = rich(createInitialState(DAY), { coin: 10, grain: 3, wood: 5 });
+    const planted = buyDecor(s, "tulip", DAY);
+    if (!planted.ok) throw new Error("plant");
+    const id = planted.state.farm.decor.at(-1)!.id;
+    expect(carePlant(planted.state, id, "grain", DAY)).toEqual({ ok: false, error: "no_food" });
+    const flag = buyDecor(s, "flag", DAY);
+    if (!flag.ok) throw new Error("flag");
+    const fid = flag.state.farm.decor.at(-1)!.id;
+    expect(carePlant(flag.state, fid, "grain", DAY)).toEqual({ ok: false, error: "not_found" });
+  });
+
+  it("buys weather once and switches freely afterwards", () => {
+    let s = createInitialState(DAY);
+    expect(s.farm.weather).toBe("sunny");
+    expect(setWeather(s, "snow")).toEqual({ ok: false, error: "locked" });
+    expect(buyWeather(s, "snow")).toEqual({ ok: false, error: "not_enough" });
+    s = rich(s, { coin: 40, page: 10 });
+    const bought = buyWeather(s, "snow");
+    expect(bought.ok).toBe(true);
+    if (!bought.ok) return;
+    s = bought.state;
+    expect(s.farm).toMatchObject({ weather: "snow", inventory: { coin: 0, page: 0 } });
+    expect(buyWeather(s, "snow")).toEqual({ ok: false, error: "already_owned" });
+    const sunny = setWeather(s, "sunny");
+    expect(sunny.ok && sunny.state.farm.weather).toBe("sunny");
+    if (sunny.ok) {
+      const back = setWeather(sunny.state, "snow");
+      expect(back.ok && back.state.farm).toMatchObject({ weather: "snow", inventory: { coin: 0 } });
+    }
+  });
+
+  it("ties every theme to a real unit and every themed item to a theme", () => {
+    for (const t of THEMES)
+      expect(
+        UNITS.some((u) => u.id === t.unlockUnit),
+        t.id,
+      ).toBe(true);
+    const themed = [...PET_KINDS, ...DECOR_KINDS].filter((k) => k.theme);
+    expect(themed.length).toBeGreaterThan(0);
+    for (const k of themed)
+      expect(
+        THEMES.some((t) => t.id === k.theme),
+        k.id,
+      ).toBe(true);
+    for (const t of THEMES) {
+      expect(PET_KINDS.some((p) => p.theme === t.id)).toBe(true);
+      expect(DECOR_KINDS.some((d) => d.theme === t.id && d.plant)).toBe(true);
+    }
+    expect(WEATHER_KINDS.find((w) => w.id === "sunny")!.price).toEqual({});
   });
 });
