@@ -1,0 +1,1117 @@
+{
+  "id": "u03",
+  "number": 3,
+  "title": "People in Town",
+  "titleZh": "小鎮上的人",
+  "islands": [
+    {
+      "id": "u03-vocab",
+      "kind": "vocab",
+      "name": "單字島",
+      "buildings": [
+        {
+          "id": "u03-v1",
+          "name": "職業與地點",
+          "emoji": "🏪",
+          "intro": "六種工作，和他們上班的地方。",
+          "cards": [
+            { "en": "cashier", "zh": "收銀員" },
+            { "en": "librarian", "zh": "圖書館員" },
+            { "en": "postal worker", "zh": "郵差" },
+            { "en": "salesperson", "zh": "店員" },
+            { "en": "server", "zh": "服務生" },
+            { "en": "vet", "zh": "獸醫" },
+            { "en": "supermarket", "zh": "超級市場" },
+            { "en": "library", "zh": "圖書館" },
+            { "en": "post office", "zh": "郵局" },
+            { "en": "department store", "zh": "百貨公司" },
+            { "en": "restaurant", "zh": "餐廳" },
+            { "en": "animal hospital", "zh": "動物醫院" }
+          ],
+          "questions": [
+            {
+              "id": "u03-v1-q1",
+              "type": "listen",
+              "say": "librarian",
+              "prompt": "聽聽看，這是誰？",
+              "options": ["圖書館員", "收銀員", "服務生"],
+              "answer": 0,
+              "tags": ["jobs"]
+            },
+            {
+              "id": "u03-v1-q2",
+              "type": "listen",
+              "say": "post office",
+              "prompt": "聽聽看，這是哪裡？",
+              "options": ["郵局", "餐廳", "圖書館"],
+              "answer": 0,
+              "tags": ["places"]
+            },
+            {
+              "id": "u03-v1-q3",
+              "type": "choice",
+              "prompt": "「獸醫」的英文是？",
+              "options": ["vet", "server", "cashier"],
+              "answer": 0,
+              "tags": ["jobs"]
+            },
+            {
+              "id": "u03-v1-q4",
+              "type": "choice",
+              "prompt": "「百貨公司」的英文是？",
+              "options": ["department store", "supermarket", "animal hospital"],
+              "answer": 0,
+              "tags": ["places"]
+            },
+            {
+              "id": "u03-v1-q5",
+              "type": "match",
+              "prompt": "把工作和上班的地方連起來",
+              "pairs": [
+                ["cashier", "supermarket"],
+                ["server", "restaurant"],
+                ["vet", "animal hospital"],
+                ["postal worker", "post office"]
+              ],
+              "tags": ["jobs", "places"]
+            },
+            {
+              "id": "u03-v1-q6",
+              "type": "choice",
+              "prompt": "Who works at the library?",
+              "say": "Who works at the library?",
+              "options": ["The librarian.", "The cashier.", "The salesperson."],
+              "answer": 0,
+              "explain": "library 是圖書館，在圖書館工作的是 librarian。",
+              "tags": ["jobs", "wh-who"]
+            },
+            {
+              "id": "u03-v1-q7",
+              "type": "choice",
+              "prompt": "Where does the salesperson work?",
+              "say": "Where does the salesperson work?",
+              "options": [
+                "At the department store.",
+                "At the post office.",
+                "At the animal hospital."
+              ],
+              "answer": 0,
+              "explain": "salesperson 是店員，在百貨公司 department store 工作。",
+              "tags": ["places", "wh-where"]
+            },
+            {
+              "id": "u03-v1-q8",
+              "type": "spell",
+              "prompt": "收銀員",
+              "say": "cashier",
+              "answer": "cashier",
+              "explain": "cashier 中間是 sh，不是 ch。",
+              "tags": ["jobs", "spelling"]
+            },
+            {
+              "id": "u03-v1-q9",
+              "type": "spell",
+              "prompt": "獸醫",
+              "say": "vet",
+              "answer": "vet",
+              "tags": ["jobs", "spelling"]
+            },
+            {
+              "id": "u03-v1-q10",
+              "type": "listen",
+              "say": "The server works at the restaurant.",
+              "prompt": "聽聽看，服務生在哪裡工作？",
+              "options": ["餐廳", "超級市場", "郵局"],
+              "answer": 0,
+              "tags": ["places"]
+            }
+          ]
+        },
+        {
+          "id": "u03-v2",
+          "name": "工作內容",
+          "emoji": "🚒",
+          "intro": "每種工作都在做什麼？",
+          "cards": [
+            { "en": "make food", "zh": "做食物" },
+            { "en": "sell things", "zh": "賣東西" },
+            { "en": "help sick animals", "zh": "幫助生病的動物" },
+            { "en": "drive buses", "zh": "開公車" },
+            { "en": "fly planes", "zh": "開飛機" },
+            { "en": "fight fires", "zh": "滅火" },
+            { "en": "cook", "zh": "廚師" },
+            { "en": "bus driver", "zh": "公車司機" },
+            { "en": "pilot", "zh": "飛行員" },
+            { "en": "firefighter", "zh": "消防員" }
+          ],
+          "questions": [
+            {
+              "id": "u03-v2-q1",
+              "type": "listen",
+              "say": "firefighter",
+              "prompt": "聽聽看，這是誰？",
+              "options": ["消防員", "飛行員", "公車司機"],
+              "answer": 0,
+              "tags": ["jobs"]
+            },
+            {
+              "id": "u03-v2-q2",
+              "type": "listen",
+              "say": "fly planes",
+              "prompt": "聽聽看，這是做什麼？",
+              "options": ["開飛機", "開公車", "做食物"],
+              "answer": 0,
+              "tags": ["actions"]
+            },
+            {
+              "id": "u03-v2-q3",
+              "type": "choice",
+              "prompt": "「廚師」的英文是？",
+              "options": ["cook", "pilot", "vet"],
+              "answer": 0,
+              "tags": ["jobs"]
+            },
+            {
+              "id": "u03-v2-q4",
+              "type": "match",
+              "prompt": "把人和他做的事連起來",
+              "pairs": [
+                ["cook", "make food"],
+                ["pilot", "fly planes"],
+                ["firefighter", "fight fires"],
+                ["bus driver", "drive buses"]
+              ],
+              "tags": ["jobs", "actions"]
+            },
+            {
+              "id": "u03-v2-q5",
+              "type": "choice",
+              "prompt": "What does the vet do?",
+              "say": "What does the vet do?",
+              "options": ["Helps sick animals.", "Sells things.", "Fights fires."],
+              "answer": 0,
+              "tags": ["actions", "wh-what"]
+            },
+            {
+              "id": "u03-v2-q6",
+              "type": "choice",
+              "prompt": "What does the salesperson do?",
+              "say": "What does the salesperson do?",
+              "options": ["Sells things.", "Makes food.", "Drives buses."],
+              "answer": 0,
+              "tags": ["actions", "wh-what"]
+            },
+            {
+              "id": "u03-v2-q7",
+              "type": "spell",
+              "prompt": "飛行員",
+              "say": "pilot",
+              "answer": "pilot",
+              "tags": ["jobs", "spelling"]
+            },
+            {
+              "id": "u03-v2-q8",
+              "type": "spell",
+              "prompt": "消防員",
+              "say": "firefighter",
+              "answer": "firefighter",
+              "explain": "fire（火）加 fighter（戰士），合起來就是消防員。",
+              "tags": ["jobs", "spelling"]
+            },
+            {
+              "id": "u03-v2-q9",
+              "type": "listen",
+              "say": "The bus driver drives buses.",
+              "prompt": "聽聽看，公車司機做什麼？",
+              "options": ["開公車", "開飛機", "賣東西"],
+              "answer": 0,
+              "tags": ["actions"]
+            }
+          ]
+        },
+        {
+          "id": "u03-v3",
+          "name": "禮物與價錢",
+          "emoji": "🎁",
+          "intro": "買禮物會用到的字，和課本裡的價錢。",
+          "cards": [
+            { "en": "present", "zh": "禮物" },
+            { "en": "birthday", "zh": "生日" },
+            { "en": "sweater", "zh": "毛衣" },
+            { "en": "shoes", "zh": "鞋子" },
+            { "en": "coat", "zh": "外套" },
+            { "en": "pen", "zh": "筆" },
+            { "en": "bike", "zh": "腳踏車" },
+            { "en": "shopping", "zh": "購物" },
+            { "en": "beautiful", "zh": "漂亮的" }
+          ],
+          "questions": [
+            {
+              "id": "u03-v3-q1",
+              "type": "listen",
+              "say": "sweater",
+              "prompt": "聽聽看，這是什麼？",
+              "options": ["毛衣", "外套", "鞋子"],
+              "answer": 0,
+              "tags": ["things"]
+            },
+            {
+              "id": "u03-v3-q2",
+              "type": "listen",
+              "say": "bike",
+              "prompt": "聽聽看，這是什麼？",
+              "options": ["腳踏車", "筆", "禮物"],
+              "answer": 0,
+              "tags": ["things"]
+            },
+            {
+              "id": "u03-v3-q3",
+              "type": "choice",
+              "prompt": "「禮物」的英文是？",
+              "options": ["present", "birthday", "shopping"],
+              "answer": 0,
+              "tags": ["things"]
+            },
+            {
+              "id": "u03-v3-q4",
+              "type": "choice",
+              "prompt": "「漂亮的」的英文是？",
+              "options": ["beautiful", "shopping", "birthday"],
+              "answer": 0,
+              "tags": ["things"]
+            },
+            {
+              "id": "u03-v3-q5",
+              "type": "match",
+              "prompt": "課本裡的價錢，連連看",
+              "pairs": [
+                ["sweater", "$30"],
+                ["coat", "$50"],
+                ["bike", "$200"],
+                ["pen", "$1"]
+              ],
+              "tags": ["prices"]
+            },
+            {
+              "id": "u03-v3-q6",
+              "type": "listen",
+              "say": "How much is this coat? It's fifty dollars.",
+              "prompt": "聽聽看，外套多少錢？",
+              "options": ["$50", "$30", "$15"],
+              "answer": 0,
+              "tags": ["prices", "how-much"]
+            },
+            {
+              "id": "u03-v3-q7",
+              "type": "spell",
+              "prompt": "毛衣",
+              "say": "sweater",
+              "answer": "sweater",
+              "tags": ["things", "spelling"]
+            },
+            {
+              "id": "u03-v3-q8",
+              "type": "spell",
+              "prompt": "鞋子",
+              "say": "shoes",
+              "answer": "shoes",
+              "tags": ["things", "spelling"]
+            },
+            {
+              "id": "u03-v3-q9",
+              "type": "choice",
+              "prompt": "Happy ______!（生日快樂）",
+              "say": "Happy birthday!",
+              "options": ["birthday", "present", "beautiful"],
+              "answer": 0,
+              "tags": ["things"]
+            }
+          ]
+        },
+        {
+          "id": "u03-v4",
+          "name": "生病",
+          "emoji": "🤒",
+          "intro": "身體不舒服的時候怎麼說。",
+          "cards": [
+            { "en": "cold", "zh": "感冒" },
+            { "en": "fever", "zh": "發燒" },
+            { "en": "stomachache", "zh": "肚子痛" },
+            { "en": "headache", "zh": "頭痛" },
+            { "en": "sick", "zh": "生病的" },
+            { "en": "doctor", "zh": "醫生" },
+            { "en": "soup", "zh": "湯" }
+          ],
+          "questions": [
+            {
+              "id": "u03-v4-q1",
+              "type": "listen",
+              "say": "headache",
+              "prompt": "聽聽看，哪裡不舒服？",
+              "options": ["頭痛", "肚子痛", "發燒"],
+              "answer": 0,
+              "tags": ["illness"]
+            },
+            {
+              "id": "u03-v4-q2",
+              "type": "listen",
+              "say": "fever",
+              "prompt": "聽聽看，哪裡不舒服？",
+              "options": ["發燒", "感冒", "頭痛"],
+              "answer": 0,
+              "tags": ["illness"]
+            },
+            {
+              "id": "u03-v4-q3",
+              "type": "choice",
+              "prompt": "「肚子痛」的英文是？",
+              "options": ["stomachache", "headache", "cold"],
+              "answer": 0,
+              "tags": ["illness"]
+            },
+            {
+              "id": "u03-v4-q4",
+              "type": "choice",
+              "prompt": "「感冒」的英文是？",
+              "options": ["cold", "fever", "soup"],
+              "answer": 0,
+              "tags": ["illness"]
+            },
+            {
+              "id": "u03-v4-q5",
+              "type": "match",
+              "prompt": "連連看",
+              "pairs": [
+                ["cold", "感冒"],
+                ["fever", "發燒"],
+                ["stomachache", "肚子痛"],
+                ["headache", "頭痛"]
+              ],
+              "tags": ["illness"]
+            },
+            {
+              "id": "u03-v4-q6",
+              "type": "choice",
+              "prompt": "What's the matter? — He has a ______.（他發燒了）",
+              "say": "What's the matter? He has a fever.",
+              "options": ["fever", "soup", "doctor"],
+              "answer": 0,
+              "tags": ["illness", "has-a"]
+            },
+            {
+              "id": "u03-v4-q7",
+              "type": "spell",
+              "prompt": "頭痛",
+              "say": "headache",
+              "answer": "headache",
+              "explain": "head（頭）加 ache（痛）。ache 唸起來像「A 克」。",
+              "tags": ["illness", "spelling"]
+            },
+            {
+              "id": "u03-v4-q8",
+              "type": "spell",
+              "prompt": "感冒",
+              "say": "cold",
+              "answer": "cold",
+              "tags": ["illness", "spelling"]
+            },
+            {
+              "id": "u03-v4-q9",
+              "type": "listen",
+              "say": "Matt is sick. He has a cold. He's eating soup.",
+              "prompt": "聽聽看，Matt 怎麼了？",
+              "options": ["感冒", "頭痛", "肚子痛"],
+              "answer": 0,
+              "tags": ["illness"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "u03-grammar",
+      "kind": "grammar",
+      "name": "文法島",
+      "buildings": [
+        {
+          "id": "u03-g1",
+          "name": "動詞加 s",
+          "emoji": "✏️",
+          "intro": "說「他、她、某一個人」做什麼的時候，動詞後面要加 s。",
+          "notes": [
+            "主詞是 he、she、it，或是一個人（the cook、the pilot）：動詞加 s。work → works，make → makes",
+            "字尾是子音加 y：去 y 加 ies。fly → flies",
+            "不規則：have → has",
+            "主詞是 I、you、we、they 或很多人：動詞不加 s"
+          ],
+          "cards": [
+            { "en": "works", "zh": "工作" },
+            { "en": "makes", "zh": "做" },
+            { "en": "sells", "zh": "賣" },
+            { "en": "helps", "zh": "幫助" },
+            { "en": "drives", "zh": "開（車）" },
+            { "en": "fights", "zh": "打（火）" },
+            { "en": "flies", "zh": "飛" },
+            { "en": "has", "zh": "有" }
+          ],
+          "questions": [
+            {
+              "id": "u03-g1-q1",
+              "type": "choice",
+              "prompt": "The pilot ______ planes.",
+              "say": "The pilot flies planes.",
+              "options": ["flies", "fly", "flys"],
+              "answer": 0,
+              "explain": "主詞 the pilot 是一個人，fly 字尾是 y，要去 y 加 ies 變成 flies。",
+              "tags": ["3sg-s", "y-ies"]
+            },
+            {
+              "id": "u03-g1-q2",
+              "type": "choice",
+              "prompt": "The librarian ______ at the library.",
+              "say": "The librarian works at the library.",
+              "options": ["works", "work"],
+              "answer": 0,
+              "explain": "the librarian 是一個人，動詞 work 要加 s。",
+              "tags": ["3sg-s"]
+            },
+            {
+              "id": "u03-g1-q3",
+              "type": "choice",
+              "prompt": "She ______ a cold.",
+              "say": "She has a cold.",
+              "options": ["has", "have", "haves"],
+              "answer": 0,
+              "explain": "have 遇到 he、she 要變成 has，不是加 s。",
+              "tags": ["3sg-s", "has-a"]
+            },
+            {
+              "id": "u03-g1-q4",
+              "type": "choice",
+              "prompt": "The vet ______ sick animals.",
+              "say": "The vet helps sick animals.",
+              "options": ["helps", "help"],
+              "answer": 0,
+              "tags": ["3sg-s"]
+            },
+            {
+              "id": "u03-g1-q5",
+              "type": "choice",
+              "prompt": "They ______ at the restaurant.",
+              "say": "They work at the restaurant.",
+              "options": ["work", "works"],
+              "answer": 0,
+              "explain": "they 是很多人，動詞不加 s。",
+              "tags": ["3sg-s"]
+            },
+            {
+              "id": "u03-g1-q6",
+              "type": "choice",
+              "prompt": "I ______ a headache.",
+              "say": "I have a headache.",
+              "options": ["have", "has"],
+              "answer": 0,
+              "explain": "主詞是 I，用 have；he、she 才用 has。",
+              "tags": ["3sg-s", "has-a"]
+            },
+            {
+              "id": "u03-g1-q7",
+              "type": "order",
+              "prompt": "把字排成句子：廚師做食物。",
+              "tokens": ["The", "cook", "makes", "food."],
+              "answer": "The cook makes food.",
+              "tags": ["3sg-s", "order"]
+            },
+            {
+              "id": "u03-g1-q8",
+              "type": "order",
+              "prompt": "把字排成句子：消防員滅火。",
+              "tokens": ["The", "firefighter", "fights", "fires."],
+              "answer": "The firefighter fights fires.",
+              "tags": ["3sg-s", "order"]
+            },
+            {
+              "id": "u03-g1-q9",
+              "type": "choice",
+              "prompt": "The salesperson ______ things.",
+              "say": "The salesperson sells things.",
+              "options": ["sells", "sell"],
+              "answer": 0,
+              "tags": ["3sg-s"]
+            },
+            {
+              "id": "u03-g1-q10",
+              "type": "choice",
+              "prompt": "Nick ______ a stomachache.",
+              "say": "Nick has a stomachache.",
+              "options": ["has", "have"],
+              "answer": 0,
+              "explain": "Nick 是一個人，have 要變成 has。",
+              "tags": ["3sg-s", "has-a"]
+            }
+          ]
+        },
+        {
+          "id": "u03-g2",
+          "name": "Does 問句",
+          "emoji": "❓",
+          "intro": "問「他／她是不是做某件事」，開頭用 Does，後面的動詞要變回原形。",
+          "notes": [
+            "Does the cook make food?（make 不加 s，因為 s 已經給 Does 了）",
+            "回答：Yes, he does. / Yes, she does.",
+            "回答：No, he doesn't. / No, she doesn't."
+          ],
+          "cards": [
+            { "en": "Does the cook make food?", "zh": "廚師做食物嗎？" },
+            { "en": "Yes, he does.", "zh": "是的，他做。" },
+            { "en": "No, she doesn't.", "zh": "不，她不做。" }
+          ],
+          "questions": [
+            {
+              "id": "u03-g2-q1",
+              "type": "choice",
+              "prompt": "Does the cook ______ food?",
+              "say": "Does the cook make food?",
+              "options": ["make", "makes"],
+              "answer": 0,
+              "explain": "Does 開頭的問句，動詞回到原形 make。",
+              "tags": ["does-q"]
+            },
+            {
+              "id": "u03-g2-q2",
+              "type": "choice",
+              "prompt": "Does the vet ______ sick animals?",
+              "say": "Does the vet help sick animals?",
+              "options": ["help", "helps"],
+              "answer": 0,
+              "explain": "Does 後面動詞不加 s。",
+              "tags": ["does-q"]
+            },
+            {
+              "id": "u03-g2-q3",
+              "type": "choice",
+              "prompt": "Does the pilot fly planes?",
+              "say": "Does the pilot fly planes?",
+              "options": ["Yes, he does.", "Yes, he is.", "No, he don't."],
+              "answer": 0,
+              "explain": "用 Does 問的，就用 does 回答。",
+              "tags": ["does-q"]
+            },
+            {
+              "id": "u03-g2-q4",
+              "type": "choice",
+              "prompt": "Does the cook sell things?",
+              "say": "Does the cook sell things?",
+              "options": ["No, he doesn't.", "Yes, he does.", "No, he isn't."],
+              "answer": 0,
+              "explain": "廚師是做食物，不是賣東西，所以回答 No, he doesn't.",
+              "tags": ["does-q"]
+            },
+            {
+              "id": "u03-g2-q5",
+              "type": "order",
+              "prompt": "把字排成問句：獸醫幫助生病的動物嗎？",
+              "tokens": ["Does", "the", "vet", "help", "sick", "animals?"],
+              "answer": "Does the vet help sick animals?",
+              "tags": ["does-q", "order"]
+            },
+            {
+              "id": "u03-g2-q6",
+              "type": "order",
+              "prompt": "把字排成問句：你爸爸開公車嗎？",
+              "tokens": ["Does", "your", "dad", "drive", "buses?"],
+              "answer": "Does your dad drive buses?",
+              "tags": ["does-q", "order"]
+            },
+            {
+              "id": "u03-g2-q7",
+              "type": "choice",
+              "prompt": "Does your mom make food? — ______",
+              "say": "Does your mom make food? Yes, she does.",
+              "options": ["Yes, she does.", "Yes, she do.", "Yes, she makes."],
+              "answer": 0,
+              "tags": ["does-q"]
+            },
+            {
+              "id": "u03-g2-q8",
+              "type": "choice",
+              "prompt": "______ the bus driver drive buses?",
+              "say": "Does the bus driver drive buses?",
+              "options": ["Does", "Do", "Is"],
+              "answer": 0,
+              "explain": "主詞是一個人（the bus driver），問句用 Does。",
+              "tags": ["does-q"]
+            }
+          ]
+        },
+        {
+          "id": "u03-g3",
+          "name": "Who / Where / What",
+          "emoji": "🔎",
+          "intro": "Who 問「誰」，Where 問「哪裡」，What 問「什麼」。",
+          "notes": [
+            "Who works at the library? — The librarian works at the library.",
+            "Where does the vet work? — The vet works at the animal hospital.",
+            "What does the pilot do? — The pilot flies planes.",
+            "What's the matter? — She has a headache.（問「怎麼了」）"
+          ],
+          "cards": [
+            { "en": "Who works at the library?", "zh": "誰在圖書館工作？" },
+            { "en": "Where does the vet work?", "zh": "獸醫在哪裡工作？" },
+            { "en": "What does the pilot do?", "zh": "飛行員做什麼？" },
+            { "en": "What's the matter?", "zh": "怎麼了？" }
+          ],
+          "questions": [
+            {
+              "id": "u03-g3-q1",
+              "type": "choice",
+              "prompt": "______ works at the post office? — The postal worker.",
+              "say": "Who works at the post office? The postal worker.",
+              "options": ["Who", "Where", "What"],
+              "answer": 0,
+              "explain": "回答是「某個人」，所以問「誰」，用 Who。",
+              "tags": ["wh-who"]
+            },
+            {
+              "id": "u03-g3-q2",
+              "type": "choice",
+              "prompt": "______ does the cashier work? — At the supermarket.",
+              "say": "Where does the cashier work? At the supermarket.",
+              "options": ["Where", "Who", "What"],
+              "answer": 0,
+              "explain": "回答是「某個地方」，所以問「哪裡」，用 Where。",
+              "tags": ["wh-where"]
+            },
+            {
+              "id": "u03-g3-q3",
+              "type": "choice",
+              "prompt": "______ does the cook do? — He makes food.",
+              "say": "What does the cook do? He makes food.",
+              "options": ["What", "Where", "Who"],
+              "answer": 0,
+              "explain": "問「做什麼」用 What ... do。",
+              "tags": ["wh-what"]
+            },
+            {
+              "id": "u03-g3-q4",
+              "type": "choice",
+              "prompt": "What's the matter?",
+              "say": "What's the matter?",
+              "options": ["She has a fever.", "She works at the library.", "She is a vet."],
+              "answer": 0,
+              "explain": "What's the matter? 是問「怎麼了」，要回答哪裡不舒服。",
+              "tags": ["wh-what", "has-a"]
+            },
+            {
+              "id": "u03-g3-q5",
+              "type": "order",
+              "prompt": "把字排成問句：收銀員在哪裡工作？",
+              "tokens": ["Where", "does", "the", "cashier", "work?"],
+              "answer": "Where does the cashier work?",
+              "tags": ["wh-where", "order"]
+            },
+            {
+              "id": "u03-g3-q6",
+              "type": "order",
+              "prompt": "把字排成問句：飛行員做什麼？",
+              "tokens": ["What", "does", "the", "pilot", "do?"],
+              "answer": "What does the pilot do?",
+              "tags": ["wh-what", "order"]
+            },
+            {
+              "id": "u03-g3-q7",
+              "type": "match",
+              "prompt": "把問題和回答連起來",
+              "pairs": [
+                ["Who works at the library?", "The librarian."],
+                ["Where does the vet work?", "At the animal hospital."],
+                ["What does the cook do?", "He makes food."],
+                ["What's the matter?", "He has a cold."]
+              ],
+              "tags": ["wh-who", "wh-where", "wh-what"]
+            },
+            {
+              "id": "u03-g3-q8",
+              "type": "choice",
+              "prompt": "Where does the server work?",
+              "say": "Where does the server work?",
+              "options": [
+                "The server works at the restaurant.",
+                "The server makes food.",
+                "The cashier works at the supermarket."
+              ],
+              "answer": 0,
+              "tags": ["wh-where"]
+            }
+          ]
+        },
+        {
+          "id": "u03-g4",
+          "name": "How much",
+          "emoji": "💰",
+          "intro": "問價錢用 How much。一個東西用 is this，很多個（像鞋子）用 are these。",
+          "notes": [
+            "How much is this sweater? — It's $30.",
+            "How much are these shoes? — They're $50.",
+            "shoes、pants 這種成雙的東西算複數，用 are these。"
+          ],
+          "cards": [
+            { "en": "How much is this sweater?", "zh": "這件毛衣多少錢？" },
+            { "en": "It's thirty dollars.", "zh": "它是 30 元。" },
+            { "en": "How much are these shoes?", "zh": "這雙鞋多少錢？" },
+            { "en": "They're fifty dollars.", "zh": "它們是 50 元。" }
+          ],
+          "questions": [
+            {
+              "id": "u03-g4-q1",
+              "type": "choice",
+              "prompt": "How much ______ this coat?",
+              "say": "How much is this coat?",
+              "options": ["is", "are"],
+              "answer": 0,
+              "explain": "一件外套是一個東西，用 is this。",
+              "tags": ["how-much"]
+            },
+            {
+              "id": "u03-g4-q2",
+              "type": "choice",
+              "prompt": "How much ______ these shoes?",
+              "say": "How much are these shoes?",
+              "options": ["are", "is"],
+              "answer": 0,
+              "explain": "鞋子是一雙，算很多個，用 are these。",
+              "tags": ["how-much"]
+            },
+            {
+              "id": "u03-g4-q3",
+              "type": "choice",
+              "prompt": "How much is this pen? — ______ $1.",
+              "say": "How much is this pen? It's one dollar.",
+              "options": ["It's", "They're", "Its"],
+              "answer": 0,
+              "explain": "用 is this 問的，回答用 It's。",
+              "tags": ["how-much"]
+            },
+            {
+              "id": "u03-g4-q4",
+              "type": "choice",
+              "prompt": "How much are these shoes? — ______ $50.",
+              "say": "How much are these shoes? They're fifty dollars.",
+              "options": ["They're", "It's", "There"],
+              "answer": 0,
+              "explain": "用 are these 問的，回答用 They're。",
+              "tags": ["how-much"]
+            },
+            {
+              "id": "u03-g4-q5",
+              "type": "order",
+              "prompt": "把字排成問句：這件毛衣多少錢？",
+              "tokens": ["How", "much", "is", "this", "sweater?"],
+              "answer": "How much is this sweater?",
+              "tags": ["how-much", "order"]
+            },
+            {
+              "id": "u03-g4-q6",
+              "type": "order",
+              "prompt": "把字排成問句：這雙鞋多少錢？",
+              "tokens": ["How", "much", "are", "these", "shoes?"],
+              "answer": "How much are these shoes?",
+              "tags": ["how-much", "order"]
+            },
+            {
+              "id": "u03-g4-q7",
+              "type": "listen",
+              "say": "How much is this bike? It's two hundred dollars.",
+              "prompt": "聽聽看，腳踏車多少錢？",
+              "options": ["$200", "$20", "$2"],
+              "answer": 0,
+              "tags": ["how-much", "prices"]
+            },
+            {
+              "id": "u03-g4-q8",
+              "type": "choice",
+              "prompt": "How much ______ this bike? — It's $200.",
+              "say": "How much is this bike? It's two hundred dollars.",
+              "options": ["is", "are"],
+              "answer": 0,
+              "tags": ["how-much"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "u03-reading",
+      "kind": "reading",
+      "name": "閱讀島",
+      "buildings": [
+        {
+          "id": "u03-r1",
+          "name": "Mom's Present",
+          "emoji": "📖",
+          "intro": "Emma 和 Ann 要買媽媽的生日禮物。先把故事每一句點來聽，再回答問題。",
+          "passage": [
+            "Emma and Ann are shopping. They want a birthday present for Mom.",
+            "Emma: Excuse me. How much is this sweater?",
+            "Salesperson: It's thirty dollars.",
+            "Emma: How much are these shoes?",
+            "Salesperson: They're fifty dollars.",
+            "It's time to go home. They don't have a present for Mom.",
+            "Emma: We can make a present!",
+            "They make flowers and a card for Mom.",
+            "Mom: They're beautiful! Thank you!"
+          ],
+          "questions": [
+            {
+              "id": "u03-r1-q1",
+              "type": "yesno",
+              "prompt": "It's Emma's birthday.",
+              "say": "It's Emma's birthday.",
+              "answer": false,
+              "explain": "是媽媽的生日，不是 Emma 的。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r1-q2",
+              "type": "yesno",
+              "prompt": "The sweater is $30.",
+              "say": "The sweater is thirty dollars.",
+              "answer": true,
+              "tags": ["reading", "prices"]
+            },
+            {
+              "id": "u03-r1-q3",
+              "type": "yesno",
+              "prompt": "The shoes are $15.",
+              "say": "The shoes are fifteen dollars.",
+              "answer": false,
+              "explain": "鞋子是 $50。fifteen（15）和 fifty（50）聽起來很像，要小心。",
+              "tags": ["reading", "prices"]
+            },
+            {
+              "id": "u03-r1-q4",
+              "type": "yesno",
+              "prompt": "They make a sweater for Mom.",
+              "say": "They make a sweater for Mom.",
+              "answer": false,
+              "explain": "她們做的是花和卡片，不是毛衣。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r1-q5",
+              "type": "choice",
+              "prompt": "Who is the present for?",
+              "say": "Who is the present for?",
+              "options": ["Mom", "Emma", "Ann"],
+              "answer": 0,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r1-q6",
+              "type": "choice",
+              "prompt": "How much are the shoes?",
+              "say": "How much are the shoes?",
+              "options": ["$50", "$30", "$15"],
+              "answer": 0,
+              "tags": ["reading", "prices"]
+            },
+            {
+              "id": "u03-r1-q7",
+              "type": "choice",
+              "prompt": "What do Emma and Ann make?",
+              "say": "What do Emma and Ann make?",
+              "options": ["Flowers and a card.", "A sweater.", "Shoes."],
+              "answer": 0,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r1-q8",
+              "type": "choice",
+              "prompt": "Mom says: “They're ______!”",
+              "say": "They're beautiful!",
+              "options": ["beautiful", "sick", "thirty"],
+              "answer": 0,
+              "tags": ["reading"]
+            }
+          ]
+        },
+        {
+          "id": "u03-r2",
+          "name": "誰生病了",
+          "emoji": "🏥",
+          "intro": "四個小朋友都生病了。先聽短文，再回答問題。",
+          "passage": [
+            "Matt is sick. He has a cold. He's eating soup.",
+            "Maggie is sick. She has a fever. The doctor can help her.",
+            "This is Nick. He has a stomachache. He isn't at school today.",
+            "This is Kelly. She's sleeping. She has a headache."
+          ],
+          "questions": [
+            {
+              "id": "u03-r2-q1",
+              "type": "match",
+              "prompt": "誰怎麼了？連連看",
+              "pairs": [
+                ["Matt", "a cold"],
+                ["Maggie", "a fever"],
+                ["Nick", "a stomachache"],
+                ["Kelly", "a headache"]
+              ],
+              "tags": ["reading", "illness"]
+            },
+            {
+              "id": "u03-r2-q2",
+              "type": "choice",
+              "prompt": "Who has a fever?",
+              "say": "Who has a fever?",
+              "options": ["Maggie", "Matt", "Nick"],
+              "answer": 0,
+              "tags": ["reading", "illness"]
+            },
+            {
+              "id": "u03-r2-q3",
+              "type": "choice",
+              "prompt": "Who isn't at school today?",
+              "say": "Who isn't at school today?",
+              "options": ["Nick", "Kelly", "Matt"],
+              "answer": 0,
+              "explain": "Nick 肚子痛，今天沒去上學。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r2-q4",
+              "type": "yesno",
+              "prompt": "Matt is eating soup.",
+              "say": "Matt is eating soup.",
+              "answer": true,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r2-q5",
+              "type": "yesno",
+              "prompt": "Kelly has a stomachache.",
+              "say": "Kelly has a stomachache.",
+              "answer": false,
+              "explain": "Kelly 是頭痛 headache，肚子痛的是 Nick。",
+              "tags": ["reading", "illness"]
+            },
+            {
+              "id": "u03-r2-q6",
+              "type": "choice",
+              "prompt": "What's the matter with Kelly?",
+              "say": "What's the matter with Kelly?",
+              "options": ["She has a headache.", "She has a cold.", "She has a fever."],
+              "answer": 0,
+              "tags": ["reading", "illness"]
+            },
+            {
+              "id": "u03-r2-q7",
+              "type": "yesno",
+              "prompt": "The doctor can help Maggie.",
+              "say": "The doctor can help Maggie.",
+              "answer": true,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r2-q8",
+              "type": "choice",
+              "prompt": "What is Kelly doing?",
+              "say": "What is Kelly doing?",
+              "options": ["She's sleeping.", "She's eating soup.", "She's at school."],
+              "answer": 0,
+              "tags": ["reading"]
+            }
+          ]
+        },
+        {
+          "id": "u03-r3",
+          "name": "獸醫訪談",
+          "emoji": "🐱",
+          "intro": "訪問獸醫 Vicky。先聽對話，再回答問題。",
+          "passage": [
+            "What do you do, Vicky?",
+            "I'm a vet. I work at the animal hospital.",
+            "Is that cat sick?",
+            "Yes, it is.",
+            "What's the matter?",
+            "It has a fever. I can help it."
+          ],
+          "questions": [
+            {
+              "id": "u03-r3-q1",
+              "type": "choice",
+              "prompt": "Vicky is a ______.",
+              "say": "Vicky is a vet.",
+              "options": ["vet", "cook", "server"],
+              "answer": 0,
+              "tags": ["reading", "jobs"]
+            },
+            {
+              "id": "u03-r3-q2",
+              "type": "choice",
+              "prompt": "She works at the ______.",
+              "say": "She works at the animal hospital.",
+              "options": ["animal hospital", "restaurant", "post office"],
+              "answer": 0,
+              "tags": ["reading", "places"]
+            },
+            {
+              "id": "u03-r3-q3",
+              "type": "choice",
+              "prompt": "The cat has a ______.",
+              "say": "The cat has a fever.",
+              "options": ["fever", "cold", "headache"],
+              "answer": 0,
+              "tags": ["reading", "illness"]
+            },
+            {
+              "id": "u03-r3-q4",
+              "type": "yesno",
+              "prompt": "The cat is sick.",
+              "say": "The cat is sick.",
+              "answer": true,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r3-q5",
+              "type": "yesno",
+              "prompt": "Vicky can't help the cat.",
+              "say": "Vicky can't help the cat.",
+              "answer": false,
+              "explain": "她說 I can help it. 她可以幫牠。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r3-q6",
+              "type": "choice",
+              "prompt": "What does Vicky do?",
+              "say": "What does Vicky do?",
+              "options": ["She helps sick animals.", "She makes food.", "She sells things."],
+              "answer": 0,
+              "tags": ["reading", "wh-what"]
+            },
+            {
+              "id": "u03-r3-q7",
+              "type": "choice",
+              "prompt": "Is that cat sick? — ______",
+              "say": "Is that cat sick? Yes, it is.",
+              "options": ["Yes, it is.", "Yes, it does.", "No, it has."],
+              "answer": 0,
+              "explain": "用 Is 問的，就用 is 回答：Yes, it is.",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u03-r3-q8",
+              "type": "listen",
+              "say": "What do you want to do? I want to be a vet.",
+              "prompt": "聽聽看，說話的人以後想做什麼？",
+              "options": ["獸醫", "廚師", "飛行員"],
+              "answer": 0,
+              "tags": ["reading", "jobs"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

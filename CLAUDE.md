@@ -1,0 +1,103 @@
+# EnglishIsland｜英文島
+
+給國小四年級小朋友的英文練習遊戲（私人使用，iPad Safari 為主）。畫面是一座可探索的 3D 等角群島：**一個課本單元＝三座相鄰的小島**（單字島、文法島、閱讀島），島上的建築＝一個題組，答對題目建築就亮燈拿星（0–3 顆）；三座島全亮，下一個單元的三座島才開放。答錯的題目進「錯題袋」，隔天再出。
+
+引擎沿用 [BeAParent](https://github.com/chiehandlu/BeAParent)（Heart Island 機制），機制拆解見 `docs/reference/heart-island-spec.md`。**只參考機制與版面，不得沿用原站的品牌、標誌、人名與文字。**
+
+@AGENTS.md
+
+## 技術選型
+
+| 項目      | 選擇                                                                   | 備註                                                                            |
+| --------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| 框架      | Next.js 16（App Router）+ TypeScript strict，`output: "export"` 純靜態 | 版本與訓練資料不同，寫 Next 相關程式前先讀 `node_modules/next/dist/docs/`       |
+| 3D        | three + React Three Fiber + drei                                       | 幾何一律程式化產生，不使用外部模型檔                                            |
+| 樣式      | Tailwind CSS v4                                                        | 色票在 `src/app/globals.css` 的 `@theme`；共用元件 class 在 `@layer components` |
+| 朗讀      | 瀏覽器 `speechSynthesis`（`src/lib/speech.ts`）                        | 英文 en-US、中文 zh-TW；不用任何 TTS API                                        |
+| 音效      | Howler.js，經 `src/lib/audio.ts` 包裝                                  | 預設靜音                                                                        |
+| 狀態      | Zustand：`gameStore`（persist 到 localStorage）、`uiStore`（不存檔）   | 無後端、無帳號                                                                  |
+| 選取狀態  | URL hash（`#island=…` / `#building=…` / `#flow=…`）                    | `src/lib/selection.ts`                                                          |
+| 測試      | Vitest                                                                 | 測 `src/game/`、`src/scene/` 純邏輯與 `src/content/` 內容規則                   |
+| Lint/格式 | ESLint（eslint-config-next）+ Prettier（printWidth 100）               |                                                                                 |
+
+## 指令
+
+```bash
+npm run dev        # 開發伺服器
+npm run build      # 靜態輸出到 out/
+npm run lint       # ESLint
+npm run typecheck  # tsc --noEmit
+npm test           # Vitest
+npm run format     # Prettier
+```
+
+提交前必須通過：`npm run lint && npm run typecheck && npm test && npm run build`。
+
+## 目錄結構
+
+```
+src/
+  app/               # 路由：/（選頭像、出發）、/play（3D 群島）、/report（家長頁）
+  components/
+    scene/           # R3F 3D 元件：World、Islands、Bridges、FlowArcs、Walkers、CameraRig
+    hud/             # 疊在 canvas 上的 DOM 介面：TopBar、IndexPanel、DetailCard、QuizPanel
+  game/              # 純 TS 遊戲規則：types、engine（星等／解鎖）、quiz（出題／判題）、review（錯題袋）、dayClock
+  scene/             # 純 TS 場景數學：六角座標、小人狀態機、燈光內插（不可 import React / three）
+  content/
+    units/           # 內容資料：每單元一個 uNN.json；index.ts 列出所有單元
+    islands.ts       # 由 UNITS 推導 ISLANDS（編號、axial 位置、所屬單元）
+    flows.ts         # 由單元自動推導協作線（單字→文法→閱讀）
+    world.ts         # 由資料推導場景配置
+  store/             # Zustand store
+  lib/               # 瀏覽器工具（朗讀、音效、URL 選取）
+docs/
+  content-format.md             # unit JSON 格式（也放進 Claude 專案知識）
+  claude-project-instructions.md # Claude 專案「英文島」的指令全文
+  reference/                    # Heart Island 規格書
+```
+
+## 架構規則
+
+1. **規則與畫面分離**：星等、解鎖、判題、錯題排程寫在 `src/game/`；座標換算、小人移動、燈光計算寫在 `src/scene/`。兩者都必須是無副作用的純函式並有測試。元件和 store 只呼叫它們，不自行計算。
+2. **內容即資料**：新增單元只加 `src/content/units/uNN.json` 和 `index.ts` 一行，不改引擎與場景元件。島的位置由單元順序推導（`islands.ts` 的 `islandAxial`），內容檔不寫座標。
+3. **一單元三島**：`kind` 固定 `vocab` / `grammar` / `reading` 各一；每島 1–5 棟（六角島只有這麼多格）。`content.test.ts` 會檢查。
+4. **進度只存三樣**：`player`、`progress`（每棟 `stars`/`best`/`attempts`）、`mistakes`（錯題與下次複習日）。島與單元的狀態一律由此推導。星星只升不降。
+5. **星等**：答對率 ≥ 0.9 三顆、≥ 0.7 兩顆、≥ 0.5 一顆；一顆星以上＝亮燈。改門檻只改 `engine.ts` 的 `starsForRatio` 與測試。
+6. **存檔相容**：改動 `GameState` 結構時，調升 `gameStore.ts` 的 `persist.version` 並更新 `migrate`。
+7. **Hydration**：讀取 `gameStore` 的頁面要先用 `useHasHydrated()` 判斷。3D 世界用 `next/dynamic`（`ssr: false`）載入。
+8. **選取**：島、建築、協作線、清單的點擊一律呼叫 `select()`，不要另存選取狀態。答題面板的開關存在 `uiStore.quiz`。
+9. **3D 實作注意**：
+   - 大量重複物件（小人）用 `InstancedMesh`，每幀在 `useFrame` 裡更新矩陣。
+   - drei `<Html>` 名牌一律掛載，以 `hidden` 切換顯示，並傳 `portal={labelLayer}`。
+   - 場景色票集中在 `components/scene/palette.ts`，與 `globals.css` 保持一致。
+   - 鏡頭動畫只在 `CameraRig` 裡處理；左側詳情卡與右側清單的寬度會傳進去讓鏡頭避開。
+10. 優先用 Server Component；只有需要互動、store 或 WebGL 的元件才加 `"use client"`。
+
+## 給小朋友用的介面規則
+
+- 按鈕可點擊區域至少 44px，答題按鈕用 `.answer-button`（64px 高、大字）。
+- 一次只出一題；答錯立刻顯示正解與一句中文解說，並朗讀正確的英文。
+- 填空題作答前不能聽到含答案的句子（`QuizPanel` 已處理）；聽力題開啟就自動唸一次。
+- 語音一律由使用者動作觸發（iPad Safari 限制），不要在載入時自動播放。
+- 中文用台灣用語、國小程度；介面文字不出現「錯誤」「失敗」這類字眼。
+
+## 內容撰寫規則
+
+見 `docs/content-format.md`。重點：正確選項放 `options[0]`（遊戲會洗牌）、每題有 `tags`、文法題必有 `explain`、英文只用該課與之前學過的字、不發明課本沒有的內容。
+
+## 部署
+
+- `npm run build` 產生 `out/`，直接放 Cloudflare Pages（build command `npm run build`，output `out`）。
+- 網址是公開的；上線後用 Cloudflare Access 或簡單 PIN 擋一下。
+- 無後端、無帳號、不收集個資；進度在裝置的 localStorage。
+
+## 實作進度
+
+- [x] 內容模型與 Unit 3（People in Town）11 棟 95 題
+- [x] 一單元三島的場景配置、建築亮燈與星星
+- [x] 答題面板六種題型、英文朗讀、錯題袋
+- [x] 家長頁（星數、挑戰次數、錯題、最常錯的 tag）
+- [ ] 錯題袋提醒（今天有幾題到期）與「每日任務」
+- [ ] 口說題（語音辨識比對）
+- [ ] 多位小朋友的存檔切換
+- [ ] 部署到 Cloudflare Pages 並加存取限制

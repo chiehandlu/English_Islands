@@ -1,0 +1,534 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { findBuilding, findQuestion } from "@/content/islands";
+import { starsForRatio } from "@/game/engine";
+import { dueMistakes, toDateString } from "@/game/review";
+import {
+  type Answer,
+  type QuizItem,
+  type QuizSession,
+  correctAnswerSpeech,
+  correctAnswerText,
+  createSession,
+  currentItem,
+  isCorrect,
+  isFinished,
+  rng,
+  spellTiles,
+  submit,
+  summary,
+} from "@/game/quiz";
+import type { Building, MatchQuestion, OrderQuestion, Question, SpellQuestion } from "@/game/types";
+import { select } from "@/lib/selection";
+import { speakChinese, speakEnglish, stopSpeaking } from "@/lib/speech";
+import { useGameStore } from "@/store/gameStore";
+import { type QuizTarget, useUiStore } from "@/store/uiStore";
+import { Stars } from "./Stars";
+
+type Phase = "question" | "feedback" | "done";
+
+/** 全螢幕答題面板：一次一題、大按鈕、答錯立刻講解。 */
+export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
+  const game = useGameStore();
+  const closeQuiz = useUiStore((s) => s.closeQuiz);
+
+  const { building, questions, title } = useMemo(() => {
+    if (target.kind === "building") {
+      const found = findBuilding(target.buildingId);
+      return {
+        building: found?.building,
+        questions: found?.building.questions ?? [],
+        title: found ? `${found.building.emoji} ${found.building.name}` : "",
+      };
+    }
+    const due = dueMistakes(game, toDateString(new Date()));
+    const qs = due
+      .map((m) => findQuestion(m.questionId)?.question)
+      .filter((q): q is Question => Boolean(q));
+    return { building: undefined, questions: qs, title: "🎒 錯題袋" };
+    // 只在開啟時建立一次題目清單
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target]);
+
+  const [session, setSession] = useState<QuizSession>(() =>
+    createSession(building?.id ?? null, questions),
+  );
+  const [phase, setPhase] = useState<Phase>(questions.length === 0 ? "done" : "question");
+  const [lastCorrect, setLastCorrect] = useState(false);
+
+  const item = currentItem(session);
+  // 作答後 index 已前進，回饋畫面要顯示剛剛答的那一題
+  const answered = session.items[session.index - 1];
+  const result = summary(session);
+
+  useEffect(() => () => stopSpeaking(), []);
+
+  const answer = (given: Answer) => {
+    if (!item) return;
+    const correct = isCorrect(item.question, given);
+    setLastCorrect(correct);
+    setSession(submit(session, correct));
+    setPhase("feedback");
+    const buildingId = building?.id ?? findQuestion(item.question.id)?.building.id ?? "";
+    if (correct) {
+      if (target.kind === "review") game.markReviewed(item.question.id);
+      speakEnglish(correctAnswerSpeech(item.question) ?? "");
+    } else {
+      game.markWrong(item.question.id, buildingId);
+      const speech = correctAnswerSpeech(item.question);
+      if (speech) speakEnglish(speech);
+    }
+  };
+
+  const next = () => {
+    stopSpeaking();
+    if (isFinished(session)) {
+      // 結算：建築挑戰記錄星星；錯題複習不給星
+      if (building && session.items.length > 0) game.finishQuiz(building.id, result.ratio);
+      setPhase("done");
+    } else setPhase("question");
+  };
+
+  const retry = () => {
+    setSession(createSession(building?.id ?? null, questions));
+    setPhase("question");
+  };
+
+  const backToIsland = () => {
+    closeQuiz();
+    if (building) {
+      const found = findBuilding(building.id);
+      if (found) select({ kind: "island", id: found.island.id });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-0 backdrop-blur-sm sm:items-center sm:p-4">
+      <section className="glass-card flex max-h-dvh w-full max-w-2xl flex-col overflow-hidden rounded-b-none sm:max-h-[92vh] sm:rounded-b-2xl">
+        <header className="flex items-center gap-3 px-5 pt-4 pb-2">
+          <h2 className="flex-1 text-lg font-bold">{title}</h2>
+          {phase !== "done" && (
+            <span className="mono-label">
+              {phase === "question" ? session.index + 1 : session.index} / {session.items.length}
+            </span>
+          )}
+          <button type="button" onClick={closeQuiz} className="icon-button" aria-label="關閉">
+            ×
+          </button>
+        </header>
+        {phase !== "done" && (
+          <div className="mx-5 h-1.5 overflow-hidden rounded-full bg-neutral-200">
+            <div
+              className="h-full rounded-full bg-accent transition-all"
+              style={{ width: `${(session.index / Math.max(1, session.items.length)) * 100}%` }}
+            />
+          </div>
+        )}
+
+        <div className="flex-1 overflow-y-auto p-5">
+          {phase === "question" && item && (
+            <QuestionView key={item.question.id} item={item} onAnswer={answer} />
+          )}
+          {phase === "feedback" && answered && (
+            <Feedback item={answered} correct={lastCorrect} onNext={next} />
+          )}
+          {phase === "done" && (
+            <Done
+              building={building}
+              review={target.kind === "review"}
+              correct={result.correct}
+              total={result.total}
+              onRetry={retry}
+              onBack={backToIsland}
+            />
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SpeakButton({ text, label = "聽一次" }: { text?: string; label?: string }) {
+  if (!text) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => speakEnglish(text)}
+      className="chip min-h-12 gap-2 px-4 text-base"
+    >
+      <span aria-hidden>🔊</span>
+      {label}
+    </button>
+  );
+}
+
+function QuestionView({ item, onAnswer }: { item: QuizItem; onAnswer: (a: Answer) => void }) {
+  const q = item.question;
+  const sayText = "say" in q ? q.say : undefined;
+
+  // 聽力題一開啟就唸一次
+  useEffect(() => {
+    if (q.type === "listen") speakEnglish(q.say);
+  }, [q]);
+
+  switch (q.type) {
+    case "choice":
+    case "listen": {
+      // 填空題的 say 含答案，作答前不給聽；聽力題本來就是要聽
+      const hasBlank = q.type === "choice" && /_{2,}/.test(q.prompt);
+      const preview = q.type === "listen" ? q.say : hasBlank ? undefined : sayText;
+      return (
+        <div className="space-y-5">
+          <Prompt text={q.prompt ?? "聽聽看，然後選出答案"} say={preview} />
+          <div className="grid gap-3">
+            {item.options.map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => onAnswer(opt)}
+                className="answer-button"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    case "yesno":
+      return (
+        <div className="space-y-5">
+          <Prompt text={q.prompt} say={q.say ?? q.prompt} hint="這句話對嗎？" />
+          <div className="grid grid-cols-2 gap-3">
+            <button type="button" onClick={() => onAnswer(true)} className="answer-button">
+              ✅ Yes
+            </button>
+            <button type="button" onClick={() => onAnswer(false)} className="answer-button">
+              ❌ No
+            </button>
+          </div>
+        </div>
+      );
+    case "spell":
+      return <SpellView q={q} onAnswer={onAnswer} />;
+    case "order":
+      return <OrderView q={q} item={item} onAnswer={onAnswer} />;
+    case "match":
+      return <MatchView q={q} item={item} onAnswer={onAnswer} />;
+  }
+}
+
+function Prompt({ text, say, hint }: { text: string; say?: string; hint?: string }) {
+  return (
+    <div className="space-y-3">
+      {hint && <p className="text-sm text-neutral-500">{hint}</p>}
+      <p className="text-2xl leading-snug font-bold">{text}</p>
+      <SpeakButton text={say} />
+    </div>
+  );
+}
+
+function SpellView({ q, onAnswer }: { q: SpellQuestion; onAnswer: (a: Answer) => void }) {
+  const tiles = useMemo(() => spellTiles(q.answer, rng(q.id.length * 131 + q.answer.length)), [q]);
+  const [used, setUsed] = useState<number[]>([]);
+  const target = q.answer.replace(/\s+/g, "");
+  const typed = used.map((i) => tiles[i]).join("");
+
+  return (
+    <div className="space-y-5">
+      <Prompt text={q.prompt} say={q.say ?? q.answer} hint="拼出英文" />
+      <div className="flex min-h-14 flex-wrap items-center gap-1 rounded-2xl bg-sand/40 p-3 text-2xl font-bold tracking-widest">
+        {Array.from({ length: target.length }).map((_, i) => (
+          <span
+            key={i}
+            className="grid h-11 w-9 place-items-center rounded-lg border-b-4 border-neutral-300 bg-white"
+          >
+            {typed[i] ?? ""}
+          </span>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {tiles.map((letter, i) => (
+          <button
+            key={i}
+            type="button"
+            disabled={used.includes(i) || typed.length >= target.length}
+            onClick={() => setUsed([...used, i])}
+            className="tile"
+          >
+            {letter}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={() => setUsed(used.slice(0, -1))}
+          className="chip min-h-12 flex-1 justify-center text-base"
+        >
+          ⌫ 退一格
+        </button>
+        <button
+          type="button"
+          disabled={typed.length !== target.length}
+          onClick={() => onAnswer(typed)}
+          className="btn-primary flex-1"
+        >
+          確定
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function OrderView({
+  q,
+  item,
+  onAnswer,
+}: {
+  q: OrderQuestion;
+  item: QuizItem;
+  onAnswer: (a: Answer) => void;
+}) {
+  const [picked, setPicked] = useState<number[]>([]);
+  const sentence = picked.map((i) => item.shuffled[i]).join(" ");
+
+  return (
+    <div className="space-y-5">
+      <Prompt text={q.prompt} hint="點字，排成一句話" />
+      <div className="flex min-h-16 flex-wrap items-center gap-2 rounded-2xl bg-sand/40 p-3">
+        {picked.length === 0 && <span className="text-neutral-400">點下面的字放進來</span>}
+        {picked.map((i, n) => (
+          <button
+            key={`${i}-${n}`}
+            type="button"
+            onClick={() => setPicked(picked.filter((_, k) => k !== n))}
+            className="word-chip bg-white"
+          >
+            {item.shuffled[i]}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {item.shuffled.map((word, i) => (
+          <button
+            key={i}
+            type="button"
+            disabled={picked.includes(i)}
+            onClick={() => setPicked([...picked, i])}
+            className="word-chip"
+          >
+            {word}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-3">
+        <SpeakButton text={sentence} label="聽我排的" />
+        <button
+          type="button"
+          disabled={picked.length !== item.shuffled.length}
+          onClick={() => onAnswer(sentence)}
+          className="btn-primary flex-1"
+        >
+          確定
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const PAIR_COLORS = ["bg-orange-200", "bg-sky-200", "bg-lime-200", "bg-violet-200", "bg-pink-200"];
+
+function MatchView({
+  q,
+  item,
+  onAnswer,
+}: {
+  q: MatchQuestion;
+  item: QuizItem;
+  onAnswer: (a: Answer) => void;
+}) {
+  const lefts = q.pairs.map((p) => p[0]);
+  const rights = item.shuffled;
+  const [active, setActive] = useState<string | null>(null);
+  const [pairs, setPairs] = useState<Record<string, string>>({});
+  const pairIndex = (left: string) => lefts.indexOf(left);
+  const rightOwner = (right: string) => Object.keys(pairs).find((l) => pairs[l] === right);
+
+  const tapLeft = (left: string) => {
+    if (pairs[left]) {
+      const rest = { ...pairs };
+      delete rest[left];
+      setPairs(rest);
+    }
+    setActive(left);
+  };
+  const tapRight = (right: string) => {
+    if (!active) return;
+    const owner = rightOwner(right);
+    const rest = { ...pairs };
+    if (owner) delete rest[owner];
+    setPairs({ ...rest, [active]: right });
+    setActive(null);
+  };
+  const complete = lefts.every((l) => pairs[l]);
+
+  return (
+    <div className="space-y-5">
+      <Prompt text={q.prompt} hint="先點左邊，再點右邊" />
+      <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-2">
+          {lefts.map((left) => (
+            <button
+              key={left}
+              type="button"
+              onClick={() => tapLeft(left)}
+              data-active={active === left}
+              className={`match-button ${pairs[left] ? PAIR_COLORS[pairIndex(left)] : ""}`}
+            >
+              {left}
+              {/[A-Za-z]/.test(left) && (
+                <span
+                  role="button"
+                  className="ml-1 text-sm opacity-60"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    speakEnglish(left);
+                  }}
+                >
+                  🔊
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        <div className="grid gap-2">
+          {rights.map((right) => {
+            const owner = rightOwner(right);
+            return (
+              <button
+                key={right}
+                type="button"
+                onClick={() => tapRight(right)}
+                className={`match-button ${owner ? PAIR_COLORS[pairIndex(owner)] : ""}`}
+              >
+                {right}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <button
+        type="button"
+        disabled={!complete}
+        onClick={() => onAnswer(pairs)}
+        className="btn-primary w-full"
+      >
+        確定
+      </button>
+    </div>
+  );
+}
+
+function Feedback({
+  item,
+  correct,
+  onNext,
+}: {
+  item: QuizItem;
+  correct: boolean;
+  onNext: () => void;
+}) {
+  const q = item.question;
+  const speech = correctAnswerSpeech(q);
+  return (
+    <div className="space-y-5 text-center">
+      <p className="text-6xl" aria-hidden>
+        {correct ? "🎉" : "💡"}
+      </p>
+      <p className="text-2xl font-bold">{correct ? "答對了！" : "再想想看"}</p>
+      <div className="rounded-2xl bg-sand/40 p-4 text-left">
+        <p className="mono-label">正確答案</p>
+        <p className="mt-1 text-xl font-bold">{correctAnswerText(q)}</p>
+        {q.explain && (
+          <p className="mt-2 flex items-start gap-2 text-neutral-700">
+            <span className="flex-1">{q.explain}</span>
+            <button
+              type="button"
+              onClick={() => speakChinese(q.explain!)}
+              className="icon-button shrink-0"
+              aria-label="聽解說"
+            >
+              🔊
+            </button>
+          </p>
+        )}
+      </div>
+      <div className="flex justify-center gap-3">
+        <SpeakButton text={speech} label="再聽一次" />
+        <button type="button" onClick={onNext} className="btn-primary flex-1" autoFocus>
+          下一題 →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Done({
+  building,
+  review,
+  correct,
+  total,
+  onRetry,
+  onBack,
+}: {
+  building?: Building;
+  review: boolean;
+  correct: number;
+  total: number;
+  onRetry: () => void;
+  onBack: () => void;
+}) {
+  const ratio = total === 0 ? 0 : correct / total;
+  const stars = starsForRatio(ratio);
+  if (total === 0) {
+    return (
+      <div className="space-y-5 text-center">
+        <p className="text-6xl">🎒</p>
+        <p className="text-xl font-bold">錯題袋是空的，太棒了！</p>
+        <button type="button" onClick={onBack} className="btn-primary w-full">
+          回到島上
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-5 text-center">
+      <p className="text-6xl" aria-hidden>
+        {stars === 3 ? "🏆" : stars >= 1 ? "✨" : "💪"}
+      </p>
+      {!review && <Stars value={stars} size="lg" />}
+      <p className="text-2xl font-bold">
+        {total} 題答對 {correct} 題
+      </p>
+      <p className="text-neutral-600">
+        {review
+          ? "答對的題目已經從錯題袋拿掉，答錯的過幾天再出現。"
+          : stars === 0
+            ? "再練習一次，答對一半以上房子就會亮燈。"
+            : stars === 3
+              ? `${building?.name ?? "這棟"}全亮了！`
+              : `${building?.name ?? "這棟"}亮燈了，全對可以拿三顆星。`}
+      </p>
+      <div className="flex gap-3">
+        <button type="button" onClick={onRetry} className="chip min-h-12 flex-1 justify-center">
+          再挑戰一次
+        </button>
+        <button type="button" onClick={onBack} className="btn-primary flex-1">
+          回到島上
+        </button>
+      </div>
+    </div>
+  );
+}

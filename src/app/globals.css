@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f1e6;
+  --foreground: #2b2a28;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: #db6a41;
+  --color-sea: #7cc4d8;
+  --color-island: #8cc084;
+  --color-sand: #f3d9a4;
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-index: Georgia, "Times New Roman", serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full bg-foreground px-6 py-3 font-medium text-background transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .glass-card {
+    @apply rounded-2xl bg-white/80 shadow-lg backdrop-blur-md;
+  }
+  .mono-label {
+    @apply font-mono text-[11px] tracking-[0.15em] text-neutral-500 uppercase;
+  }
+  .index-number {
+    @apply w-10 font-[family-name:var(--font-index)] text-2xl font-bold text-accent italic;
+  }
+  .name-tag {
+    @apply flex cursor-pointer items-center gap-1.5 rounded-full bg-white py-1 pr-3 pl-1 text-sm font-medium whitespace-nowrap shadow-md select-none data-[selected=true]:bg-foreground data-[selected=true]:text-background;
+  }
+  .name-tag-number {
+    @apply grid h-5 w-5 place-items-center rounded-full bg-accent text-[11px] text-white;
+  }
+  .tool-button {
+    @apply min-h-9 rounded-xl px-3 text-sm transition hover:bg-neutral-100 aria-pressed:bg-foreground aria-pressed:text-background;
+  }
+  .icon-button {
+    @apply grid h-9 w-9 place-items-center rounded-full text-xl text-neutral-500 hover:bg-neutral-100;
+  }
+  .tab {
+    @apply rounded-full px-3 py-1.5 text-sm aria-selected:bg-foreground aria-selected:text-background;
+  }
+  .list-row {
+    @apply flex min-h-11 w-full items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-neutral-50 data-[selected=true]:bg-accent/10;
+  }
+  .status-pill {
+    @apply rounded-full px-2 py-0.5 text-[11px] whitespace-nowrap data-[status=current]:bg-accent data-[status=current]:text-white data-[status=locked]:bg-neutral-100 data-[status=locked]:text-neutral-500 data-[status=visited]:bg-island/30;
+  }
+  .tag {
+    @apply rounded-full bg-neutral-100 px-2 py-0.5;
+  }
+  .chip {
+    @apply inline-flex min-h-9 items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 text-sm hover:border-accent;
+  }
+  .flow-badge {
+    @apply inline-grid h-7 min-w-9 place-items-center rounded-lg px-1.5 text-xs font-bold text-white;
+  }
+  /* 答題用的大按鈕：小朋友手指點得到 */
+  .answer-button {
+    @apply min-h-16 rounded-2xl border-2 border-neutral-200 bg-white px-4 py-3 text-left text-xl font-medium shadow-sm transition active:scale-[0.98] hover:border-accent;
+  }
+  .tile {
+    @apply grid h-12 w-12 place-items-center rounded-xl border-b-4 border-amber-300 bg-amber-100 text-xl font-bold lowercase select-none active:translate-y-0.5 active:border-b-2 disabled:opacity-30;
+  }
+  .word-chip {
+    @apply min-h-12 rounded-xl border-2 border-neutral-200 bg-sand/60 px-4 text-lg font-medium select-none hover:border-accent disabled:opacity-30;
+  }
+  .match-button {
+    @apply min-h-14 rounded-xl border-2 border-neutral-200 bg-white px-3 py-2 text-left text-base font-medium transition data-[active=true]:border-accent data-[active=true]:ring-2 data-[active=true]:ring-accent/40;
+  }
+}
