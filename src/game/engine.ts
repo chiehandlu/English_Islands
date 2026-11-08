@@ -1,11 +1,14 @@
 import { ISLANDS, UNITS, islandsOfUnit } from "@/content/islands";
+import { createFarmState } from "./farm";
+import { toDateString } from "./review";
 import type { Building, BuildingProgress, GameState, Island, Stars, Unit } from "./types";
 
-export function createInitialState(): GameState {
+export function createInitialState(today = toDateString(new Date())): GameState {
   return {
     player: { name: "", avatar: "🦊" },
     progress: {},
     mistakes: [],
+    farm: createFarmState(today),
   };
 }
 

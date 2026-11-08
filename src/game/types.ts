@@ -156,8 +156,87 @@ export interface Mistake {
   dueDate: string;
 }
 
+// ---------- 農場與獎勵 ----------
+
+export type ItemId = "coin" | "grain" | "veg" | "wood" | "brick" | "page" | "key";
+export type Inventory = Record<ItemId, number>;
+export type FeedItem = "grain" | "veg";
+export type PetTier = "common" | "advanced" | "rare" | "legend";
+/** 傳說寵物的取得條件 */
+export type Achievement = "unit_lit" | "review_cleared_5" | "streak_7";
+
+/** 圖鑑裡的一種寵物（資料，在 content/farm.ts） */
+export interface PetKind {
+  id: string;
+  name: string;
+  emoji: string;
+  tier: PetTier;
+  favorite: FeedItem;
+  /** 傳說沒有價格 */
+  price?: Partial<Inventory>;
+  /** 要先蓋好的裝飾 id */
+  requiresDecor?: string;
+  achievement?: Achievement;
+}
+
+/** 一種裝飾（資料，在 content/farm.ts） */
+export interface DecorKind {
+  id: string;
+  name: string;
+  emoji: string;
+  price: Partial<Inventory>;
+  /** 小屋擴建不佔格、鐘可以點、獎盃是成就送的 */
+  effect?: "barn_plus_3" | "bell" | "trophy";
+  /** 最多買幾件；省略為不限 */
+  maxCount?: number;
+  /** 蓋了之後可以領養的寵物 id（顯示用） */
+  unlocksPet?: string;
+  buyable: boolean;
+}
+
+export interface OwnedPet {
+  id: string;
+  kind: string;
+  name: string;
+  growth: number;
+  /** 0–5 在島上，null 在小屋 */
+  slot: number | null;
+  fedOn: string;
+  fedToday: number;
+  adoptedOn: string;
+}
+
+export interface PlacedDecor {
+  id: string;
+  kind: string;
+  /** 0–11 在外圈，null 還沒放（只有成就送的會這樣） */
+  slot: number | null;
+}
+
+export interface FarmState {
+  inventory: Inventory;
+  pets: OwnedPet[];
+  decor: PlacedDecor[];
+  barnExpansions: number;
+  /** 每日計數的日期；換日就清 */
+  runsDate: string;
+  runsToday: Record<string, number>;
+  islandsToday: IslandKind[];
+  dailyBonusOn: string | null;
+  /** 已領過「首次全對」獎勵的建築 */
+  firstPerfect: string[];
+  /** 已領過的里程碑，例如 lit:u03-v1、island:u03-vocab、unit:u03 */
+  claimed: string[];
+  streak: { days: number; lastDay: string | null };
+  reviewCleared: number;
+  lifetimeCoins: number;
+  /** 最近 14 天每天的挑戰次數，家長頁用 */
+  runsHistory: Record<string, number>;
+}
+
 export interface GameState {
   player: { name: string; avatar: string };
   progress: Record<string, BuildingProgress>;
   mistakes: Mistake[];
+  farm: FarmState;
 }

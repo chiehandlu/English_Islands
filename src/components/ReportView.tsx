@@ -1,8 +1,12 @@
 "use client";
 
 import { Stars } from "@/components/hud/Stars";
+import { ItemChips } from "@/components/hud/RewardList";
+import { PET_KINDS, getPetKind } from "@/content/farm";
+import { STAGE_LABELS, petStage } from "@/game/farm";
 import { UNITS, findQuestion, islandsOfUnit } from "@/content/islands";
 import { maxTotalStars, progressOf, totalStars, unitStatus } from "@/game/engine";
+import { useState } from "react";
 import { useGameStore, useHasHydrated } from "@/store/gameStore";
 import { useUiStore } from "@/store/uiStore";
 
@@ -13,6 +17,7 @@ export function ReportView() {
   const hydrated = useHasHydrated();
   const game = useGameStore();
   const setView = useUiStore((s) => s.setView);
+  const [armed, setArmed] = useState(false);
   if (!hydrated) return null;
 
   const tagCounts: Record<string, number> = {};
@@ -49,6 +54,40 @@ export function ReportView() {
             最常錯的重點：{weakTags.map(([tag, n]) => `${tag}（${n}）`).join("、")}
           </p>
         )}
+      </section>
+
+      <section className="glass-card p-5">
+        <p className="mono-label">農場</p>
+        <p className="mt-2 text-sm">
+          累計賺到 🪙 {game.farm.lifetimeCoins}・現在有{" "}
+          <ItemChips items={game.farm.inventory} size="sm" />
+        </p>
+        <p className="mt-2 text-sm">
+          寵物 {game.farm.pets.length} 隻（圖鑑 {new Set(game.farm.pets.map((p) => p.kind)).size} /{" "}
+          {PET_KINDS.length}）：
+          {game.farm.pets.map((p) => {
+            const kind = getPetKind(p.kind);
+            return (
+              <span key={p.id} className="ml-2 whitespace-nowrap">
+                {kind?.emoji} {p.name}（{STAGE_LABELS[petStage(p.growth)]}）
+              </span>
+            );
+          })}
+        </p>
+        <p className="mt-2 text-sm text-neutral-600">
+          最近 7 天挑戰次數：
+          {Array.from({ length: 7 }, (_, i) => {
+            const d = new Date();
+            d.setDate(d.getDate() - (6 - i));
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+            return (
+              <span key={key} className="ml-2 tabular-nums">
+                {key.slice(5)}：{game.farm.runsHistory[key] ?? 0}
+              </span>
+            );
+          })}
+          ・連續 {game.farm.streak.days} 天
+        </p>
       </section>
 
       {UNITS.map((unit, u) => (
@@ -120,15 +159,29 @@ export function ReportView() {
       )}
 
       <section className="text-center">
-        <button
-          type="button"
-          onClick={() => {
-            if (window.confirm("確定要清掉所有星星和錯題紀錄嗎？")) game.reset();
-          }}
-          className="chip text-neutral-500"
-        >
-          重設進度
-        </button>
+        {/* 不用 window.confirm：artifact 的 iframe 會擋掉；改成按兩次 */}
+        {armed ? (
+          <div className="inline-flex items-center gap-2">
+            <span className="text-sm text-rose-700">會清掉所有星星、錯題和農場，確定？</span>
+            <button
+              type="button"
+              onClick={() => {
+                game.reset();
+                setArmed(false);
+              }}
+              className="chip border-rose-300 text-rose-700"
+            >
+              確定重設
+            </button>
+            <button type="button" onClick={() => setArmed(false)} className="chip">
+              取消
+            </button>
+          </div>
+        ) : (
+          <button type="button" onClick={() => setArmed(true)} className="chip text-neutral-500">
+            重設進度
+          </button>
+        )}
       </section>
     </main>
   );

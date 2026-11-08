@@ -22,8 +22,11 @@ import {
 import type { Building, MatchQuestion, OrderQuestion, Question, SpellQuestion } from "@/game/types";
 import { select } from "@/lib/selection";
 import { speakChinese, speakEnglish, stopSpeaking } from "@/lib/speech";
-import { useGameStore } from "@/store/gameStore";
+import type { RunOutcome } from "@/game/rewards";
+import type { IslandKind } from "@/game/types";
+import { type QuizSummary, useGameStore } from "@/store/gameStore";
 import { type QuizTarget, useUiStore } from "@/store/uiStore";
+import { RewardList } from "./RewardList";
 import { Stars } from "./Stars";
 
 type Phase = "question" | "feedback" | "done";
@@ -33,11 +36,12 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
   const game = useGameStore();
   const closeQuiz = useUiStore((s) => s.closeQuiz);
 
-  const { building, questions, title } = useMemo(() => {
+  const { building, islandKind, questions, title } = useMemo(() => {
     if (target.kind === "building") {
       const found = findBuilding(target.buildingId);
       return {
         building: found?.building,
+        islandKind: found?.island.kind ?? null,
         questions: found?.building.questions ?? [],
         title: found ? `${found.building.emoji} ${found.building.name}` : "",
       };
@@ -46,7 +50,7 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
     const qs = due
       .map((m) => findQuestion(m.questionId)?.question)
       .filter((q): q is Question => Boolean(q));
-    return { building: undefined, questions: qs, title: "🎒 錯題袋" };
+    return { building: undefined, islandKind: null, questions: qs, title: "🎒 錯題袋" };
     // 只在開啟時建立一次題目清單
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target]);
@@ -56,6 +60,7 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
   );
   const [phase, setPhase] = useState<Phase>(questions.length === 0 ? "done" : "question");
   const [lastCorrect, setLastCorrect] = useState(false);
+  const [summaryResult, setSummaryResult] = useState<QuizSummary | null>(null);
 
   const item = currentItem(session);
   // 作答後 index 已前進，回饋畫面要顯示剛剛答的那一題
@@ -84,14 +89,33 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
   const next = () => {
     stopSpeaking();
     if (isFinished(session)) {
-      // 結算：建築挑戰記錄星星；錯題複習不給星
-      if (building && session.items.length > 0) game.finishQuiz(building.id, result.ratio);
+      // 結算：建築挑戰記錄星星；兩種都發獎勵、領里程碑
+      if (session.items.length > 0) {
+        const outcomes = session.items.map((it, i) => ({
+          questionId: it.question.id,
+          type: it.question.type,
+          islandKind: (islandKind ??
+            findQuestion(it.question.id)?.island.kind ??
+            "vocab") as IslandKind,
+          correct: session.results[i] ?? false,
+        }));
+        const run: RunOutcome = {
+          buildingId: building?.id ?? null,
+          islandKind,
+          outcomes,
+          reviewCleared:
+            target.kind === "review" &&
+            dueMistakes(useGameStore.getState(), toDateString(new Date())).length === 0,
+        };
+        setSummaryResult(game.finishQuiz(run, result.ratio));
+      }
       setPhase("done");
     } else setPhase("question");
   };
 
   const retry = () => {
     setSession(createSession(building?.id ?? null, questions));
+    setSummaryResult(null);
     setPhase("question");
   };
 
@@ -139,8 +163,13 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
               review={target.kind === "review"}
               correct={result.correct}
               total={result.total}
+              summary={summaryResult}
               onRetry={retry}
               onBack={backToIsland}
+              onFarm={() => {
+                closeQuiz();
+                select({ kind: "farm", id: "farm" });
+              }}
             />
           )}
         </div>
@@ -385,13 +414,14 @@ function MatchView({
               type="button"
               onClick={() => tapLeft(left)}
               data-active={active === left}
-              className={`match-button ${pairs[left] ? PAIR_COLORS[pairIndex(left)] : ""}`}
+              className={`match-button flex items-center justify-between gap-2 ${pairs[left] ? PAIR_COLORS[pairIndex(left)] : ""}`}
             >
-              {left}
+              <span className="flex-1">{left}</span>
               {/[A-Za-z]/.test(left) && (
                 <span
                   role="button"
-                  className="ml-1 text-sm opacity-60"
+                  aria-label="聽發音"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm opacity-60 hover:bg-black/5"
                   onClick={(e) => {
                     e.stopPropagation();
                     speakEnglish(left);
@@ -480,15 +510,19 @@ function Done({
   review,
   correct,
   total,
+  summary,
   onRetry,
   onBack,
+  onFarm,
 }: {
   building?: Building;
   review: boolean;
   correct: number;
   total: number;
+  summary: QuizSummary | null;
   onRetry: () => void;
   onBack: () => void;
+  onFarm: () => void;
 }) {
   const ratio = total === 0 ? 0 : correct / total;
   const stars = starsForRatio(ratio);
@@ -521,6 +555,7 @@ function Done({
               ? `${building?.name ?? "這棟"}全亮了！`
               : `${building?.name ?? "這棟"}亮燈了，全對可以拿三顆星。`}
       </p>
+      {summary && <RewardList summary={summary} onFarm={onFarm} />}
       <div className="flex gap-3">
         <button type="button" onClick={onRetry} className="chip min-h-12 flex-1 justify-center">
           再挑戰一次

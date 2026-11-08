@@ -18,6 +18,9 @@ interface UiStore {
   quiz: QuizTarget;
   view: View;
   setView: (view: View) => void;
+  /** 農場小鐘最後一次響的時間（performance.now），寵物會跳一下 */
+  bellAt: number;
+  ringBell: () => void;
   toggle: (key: "showLabels" | "showCarry" | "showFlows" | "paused" | "panelOpen") => void;
   openQuiz: (target: QuizTarget) => void;
   closeQuiz: () => void;
@@ -35,6 +38,8 @@ export const useUiStore = create<UiStore>()((set) => ({
   quiz: null,
   view: "home",
   setView: (view) => set({ view, quiz: null }),
+  bellAt: -10000,
+  ringBell: () => set({ bellAt: performance.now() }),
   toggle: (key) => set((s) => ({ [key]: !s[key] })),
   openQuiz: (target) => set({ quiz: target }),
   closeQuiz: () => set({ quiz: null }),

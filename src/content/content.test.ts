@@ -85,6 +85,17 @@ describe("content", () => {
     }
   });
 
+  it("gives every reading building a match question so keys can drop", () => {
+    for (const island of ISLANDS.filter((i) => i.kind === "reading")) {
+      for (const b of island.buildings) {
+        expect(
+          b.questions.some((q) => q.type === "match"),
+          b.id,
+        ).toBe(true);
+      }
+    }
+  });
+
   it("mixes question types inside a building", () => {
     for (const b of buildings) {
       const types = new Set(b.questions.map((q) => q.type));

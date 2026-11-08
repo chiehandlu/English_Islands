@@ -11,6 +11,7 @@ import { useGameStore } from "@/store/gameStore";
 import { useUiStore } from "@/store/uiStore";
 import { Bridges } from "./Bridges";
 import { CAMERA_OFFSET, CameraRig } from "./CameraRig";
+import { FarmIsland } from "./FarmIsland";
 import { FlowArcs } from "./FlowArcs";
 import { Islands } from "./Islands";
 import { Walkers } from "./Walkers";
@@ -97,6 +98,7 @@ export default function World() {
           showLabels={showLabels}
           labelLayer={labelLayer}
         />
+        <FarmIsland selection={selection} showLabels={showLabels} labelLayer={labelLayer} />
         {showFlows && <FlowArcs selection={selection} />}
         <Walkers selection={selection} paused={paused} showCarry={showCarry} />
         <MapControls makeDefault enableRotate={false} minZoom={12} maxZoom={180} />

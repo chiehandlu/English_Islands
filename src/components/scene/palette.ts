@@ -16,6 +16,13 @@ export const SCENE_COLORS = {
   windowDark: "#8c857a",
   star: "#f6c344",
   tree: "#5f9e5a",
+  trunk: "#8d6a4a",
+  soil: "#8c6b4f",
+  stone: "#b9b4a8",
+  farmGrass: "#a9d18e",
+  farmYard: "#e6cf98",
+  barn: "#d9534f",
+  barnRoof: "#7a3b2e",
 };
 
 export const ROOF_COLORS = ["#db6a41", "#e2a93b", "#6aa6a0", "#8b7bc4", "#d98a8a"];

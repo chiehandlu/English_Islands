@@ -3,14 +3,17 @@
 import { CARRY_LABELS, WALKER_LABELS, flowIslands, flowsForIsland, getFlow } from "@/content/flows";
 import { findBuilding, getIsland, unitOfIsland } from "@/content/islands";
 import { ISLANDS } from "@/content/world";
+import { ITEM_META } from "@/content/farm";
 import { islandComplete, islandStatus, progressOf, starsOf } from "@/game/engine";
-import { mistakeCountByBuilding } from "@/game/review";
+import { mistakeCountByBuilding, toDateString } from "@/game/review";
+import { dropsForBuilding, runsLeftToday } from "@/game/rewards";
 import type { Building, Flow, Island } from "@/game/types";
 import { type Selection, select } from "@/lib/selection";
 import { speakEnglish } from "@/lib/speech";
 import { useGameStore } from "@/store/gameStore";
 import { useUiStore } from "@/store/uiStore";
 import { FLOW_COLORS } from "../scene/palette";
+import { FarmCard } from "./FarmCard";
 import { Stars } from "./Stars";
 
 export const KIND_LABELS = { vocab: "單字", grammar: "文法", reading: "閱讀" } as const;
@@ -27,6 +30,8 @@ export function DetailCard({ selection }: { selection: Selection }) {
   } else if (selection?.kind === "flow") {
     const flow = getFlow(selection.id);
     if (flow) body = <FlowCard flow={flow} />;
+  } else if (selection?.kind === "farm") {
+    body = <FarmCard />;
   }
   if (!body) return null;
 
@@ -140,6 +145,11 @@ function BuildingCard({ island, building }: { island: Island; building: Building
   const status = islandStatus(game, ISLANDS.indexOf(island));
   const progress = progressOf(game, building.id);
   const open = status !== "locked";
+  const drops = dropsForBuilding(
+    island.kind,
+    building.questions.map((q) => q.type),
+  );
+  const runsLeft = runsLeftToday(game.farm, building.id, toDateString(new Date()));
 
   return (
     <article>
@@ -219,6 +229,15 @@ function BuildingCard({ island, building }: { island: Island; building: Building
       )}
 
       <div className="mt-5">
+        <p className="mb-2 text-xs text-neutral-500">
+          這棟會掉：
+          {drops.map((d) => (
+            <span key={d} className="ml-1">
+              {ITEM_META[d].emoji} {ITEM_META[d].name}
+            </span>
+          ))}
+          <span className="ml-2">・今天還有 {runsLeft} 次全額</span>
+        </p>
         {open ? (
           <button
             type="button"

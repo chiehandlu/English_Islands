@@ -3,6 +3,7 @@
 import { UNITS, islandsOfUnit } from "@/content/islands";
 import { ISLANDS } from "@/content/world";
 import { islandMaxStars, islandStars, islandStatus, unitStatus } from "@/game/engine";
+import { petsOutside } from "@/game/farm";
 import { type Selection, select } from "@/lib/selection";
 import { useGameStore } from "@/store/gameStore";
 import { useUiStore } from "@/store/uiStore";
@@ -48,6 +49,24 @@ export function IndexPanel({ selection }: { selection: Selection }) {
         </button>
       </header>
       <ol className="flex-1 overflow-y-auto p-3">
+        <li className="mb-3">
+          <button
+            type="button"
+            data-selected={selection?.kind === "farm"}
+            onClick={() => select({ kind: "farm", id: "farm" })}
+            className="list-row"
+          >
+            <span className="text-2xl" aria-hidden>
+              🐔
+            </span>
+            <span className="flex-1">
+              <span className="block font-medium">農場</span>
+              <span className="text-xs text-neutral-500">
+                {petsOutside(game.farm).length} 隻在島上・🪙 {game.farm.inventory.coin}
+              </span>
+            </span>
+          </button>
+        </li>
         {UNITS.map((unit, u) => {
           const status = unitStatus(game, u);
           return (

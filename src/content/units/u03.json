@@ -15,18 +15,54 @@
           "emoji": "🏪",
           "intro": "六種工作，和他們上班的地方。",
           "cards": [
-            { "en": "cashier", "zh": "收銀員" },
-            { "en": "librarian", "zh": "圖書館員" },
-            { "en": "postal worker", "zh": "郵差" },
-            { "en": "salesperson", "zh": "店員" },
-            { "en": "server", "zh": "服務生" },
-            { "en": "vet", "zh": "獸醫" },
-            { "en": "supermarket", "zh": "超級市場" },
-            { "en": "library", "zh": "圖書館" },
-            { "en": "post office", "zh": "郵局" },
-            { "en": "department store", "zh": "百貨公司" },
-            { "en": "restaurant", "zh": "餐廳" },
-            { "en": "animal hospital", "zh": "動物醫院" }
+            {
+              "en": "cashier",
+              "zh": "收銀員"
+            },
+            {
+              "en": "librarian",
+              "zh": "圖書館員"
+            },
+            {
+              "en": "postal worker",
+              "zh": "郵差"
+            },
+            {
+              "en": "salesperson",
+              "zh": "店員"
+            },
+            {
+              "en": "server",
+              "zh": "服務生"
+            },
+            {
+              "en": "vet",
+              "zh": "獸醫"
+            },
+            {
+              "en": "supermarket",
+              "zh": "超級市場"
+            },
+            {
+              "en": "library",
+              "zh": "圖書館"
+            },
+            {
+              "en": "post office",
+              "zh": "郵局"
+            },
+            {
+              "en": "department store",
+              "zh": "百貨公司"
+            },
+            {
+              "en": "restaurant",
+              "zh": "餐廳"
+            },
+            {
+              "en": "animal hospital",
+              "zh": "動物醫院"
+            }
           ],
           "questions": [
             {
@@ -133,16 +169,46 @@
           "emoji": "🚒",
           "intro": "每種工作都在做什麼？",
           "cards": [
-            { "en": "make food", "zh": "做食物" },
-            { "en": "sell things", "zh": "賣東西" },
-            { "en": "help sick animals", "zh": "幫助生病的動物" },
-            { "en": "drive buses", "zh": "開公車" },
-            { "en": "fly planes", "zh": "開飛機" },
-            { "en": "fight fires", "zh": "滅火" },
-            { "en": "cook", "zh": "廚師" },
-            { "en": "bus driver", "zh": "公車司機" },
-            { "en": "pilot", "zh": "飛行員" },
-            { "en": "firefighter", "zh": "消防員" }
+            {
+              "en": "make food",
+              "zh": "做食物"
+            },
+            {
+              "en": "sell things",
+              "zh": "賣東西"
+            },
+            {
+              "en": "help sick animals",
+              "zh": "幫助生病的動物"
+            },
+            {
+              "en": "drive buses",
+              "zh": "開公車"
+            },
+            {
+              "en": "fly planes",
+              "zh": "開飛機"
+            },
+            {
+              "en": "fight fires",
+              "zh": "滅火"
+            },
+            {
+              "en": "cook",
+              "zh": "廚師"
+            },
+            {
+              "en": "bus driver",
+              "zh": "公車司機"
+            },
+            {
+              "en": "pilot",
+              "zh": "飛行員"
+            },
+            {
+              "en": "firefighter",
+              "zh": "消防員"
+            }
           ],
           "questions": [
             {
@@ -235,15 +301,42 @@
           "emoji": "🎁",
           "intro": "買禮物會用到的字，和課本裡的價錢。",
           "cards": [
-            { "en": "present", "zh": "禮物" },
-            { "en": "birthday", "zh": "生日" },
-            { "en": "sweater", "zh": "毛衣" },
-            { "en": "shoes", "zh": "鞋子" },
-            { "en": "coat", "zh": "外套" },
-            { "en": "pen", "zh": "筆" },
-            { "en": "bike", "zh": "腳踏車" },
-            { "en": "shopping", "zh": "購物" },
-            { "en": "beautiful", "zh": "漂亮的" }
+            {
+              "en": "present",
+              "zh": "禮物"
+            },
+            {
+              "en": "birthday",
+              "zh": "生日"
+            },
+            {
+              "en": "sweater",
+              "zh": "毛衣"
+            },
+            {
+              "en": "shoes",
+              "zh": "鞋子"
+            },
+            {
+              "en": "coat",
+              "zh": "外套"
+            },
+            {
+              "en": "pen",
+              "zh": "筆"
+            },
+            {
+              "en": "bike",
+              "zh": "腳踏車"
+            },
+            {
+              "en": "shopping",
+              "zh": "購物"
+            },
+            {
+              "en": "beautiful",
+              "zh": "漂亮的"
+            }
           ],
           "questions": [
             {
@@ -334,13 +427,34 @@
           "emoji": "🤒",
           "intro": "身體不舒服的時候怎麼說。",
           "cards": [
-            { "en": "cold", "zh": "感冒" },
-            { "en": "fever", "zh": "發燒" },
-            { "en": "stomachache", "zh": "肚子痛" },
-            { "en": "headache", "zh": "頭痛" },
-            { "en": "sick", "zh": "生病的" },
-            { "en": "doctor", "zh": "醫生" },
-            { "en": "soup", "zh": "湯" }
+            {
+              "en": "cold",
+              "zh": "感冒"
+            },
+            {
+              "en": "fever",
+              "zh": "發燒"
+            },
+            {
+              "en": "stomachache",
+              "zh": "肚子痛"
+            },
+            {
+              "en": "headache",
+              "zh": "頭痛"
+            },
+            {
+              "en": "sick",
+              "zh": "生病的"
+            },
+            {
+              "en": "doctor",
+              "zh": "醫生"
+            },
+            {
+              "en": "soup",
+              "zh": "湯"
+            }
           ],
           "questions": [
             {
@@ -445,14 +559,38 @@
             "主詞是 I、you、we、they 或很多人：動詞不加 s"
           ],
           "cards": [
-            { "en": "works", "zh": "工作" },
-            { "en": "makes", "zh": "做" },
-            { "en": "sells", "zh": "賣" },
-            { "en": "helps", "zh": "幫助" },
-            { "en": "drives", "zh": "開（車）" },
-            { "en": "fights", "zh": "打（火）" },
-            { "en": "flies", "zh": "飛" },
-            { "en": "has", "zh": "有" }
+            {
+              "en": "works",
+              "zh": "工作"
+            },
+            {
+              "en": "makes",
+              "zh": "做"
+            },
+            {
+              "en": "sells",
+              "zh": "賣"
+            },
+            {
+              "en": "helps",
+              "zh": "幫助"
+            },
+            {
+              "en": "drives",
+              "zh": "開（車）"
+            },
+            {
+              "en": "fights",
+              "zh": "打（火）"
+            },
+            {
+              "en": "flies",
+              "zh": "飛"
+            },
+            {
+              "en": "has",
+              "zh": "有"
+            }
           ],
           "questions": [
             {
@@ -562,9 +700,18 @@
             "回答：No, he doesn't. / No, she doesn't."
           ],
           "cards": [
-            { "en": "Does the cook make food?", "zh": "廚師做食物嗎？" },
-            { "en": "Yes, he does.", "zh": "是的，他做。" },
-            { "en": "No, she doesn't.", "zh": "不，她不做。" }
+            {
+              "en": "Does the cook make food?",
+              "zh": "廚師做食物嗎？"
+            },
+            {
+              "en": "Yes, he does.",
+              "zh": "是的，他做。"
+            },
+            {
+              "en": "No, she doesn't.",
+              "zh": "不，她不做。"
+            }
           ],
           "questions": [
             {
@@ -656,10 +803,22 @@
             "What's the matter? — She has a headache.（問「怎麼了」）"
           ],
           "cards": [
-            { "en": "Who works at the library?", "zh": "誰在圖書館工作？" },
-            { "en": "Where does the vet work?", "zh": "獸醫在哪裡工作？" },
-            { "en": "What does the pilot do?", "zh": "飛行員做什麼？" },
-            { "en": "What's the matter?", "zh": "怎麼了？" }
+            {
+              "en": "Who works at the library?",
+              "zh": "誰在圖書館工作？"
+            },
+            {
+              "en": "Where does the vet work?",
+              "zh": "獸醫在哪裡工作？"
+            },
+            {
+              "en": "What does the pilot do?",
+              "zh": "飛行員做什麼？"
+            },
+            {
+              "en": "What's the matter?",
+              "zh": "怎麼了？"
+            }
           ],
           "questions": [
             {
@@ -756,10 +915,22 @@
             "shoes、pants 這種成雙的東西算複數，用 are these。"
           ],
           "cards": [
-            { "en": "How much is this sweater?", "zh": "這件毛衣多少錢？" },
-            { "en": "It's thirty dollars.", "zh": "它是 30 元。" },
-            { "en": "How much are these shoes?", "zh": "這雙鞋多少錢？" },
-            { "en": "They're fifty dollars.", "zh": "它們是 50 元。" }
+            {
+              "en": "How much is this sweater?",
+              "zh": "這件毛衣多少錢？"
+            },
+            {
+              "en": "It's thirty dollars.",
+              "zh": "它是 30 元。"
+            },
+            {
+              "en": "How much are these shoes?",
+              "zh": "這雙鞋多少錢？"
+            },
+            {
+              "en": "They're fifty dollars.",
+              "zh": "它們是 50 元。"
+            }
           ],
           "questions": [
             {
@@ -932,6 +1103,17 @@
               "options": ["beautiful", "sick", "thirty"],
               "answer": 0,
               "tags": ["reading"]
+            },
+            {
+              "id": "u03-r1-q9",
+              "type": "match",
+              "prompt": "把故事裡的東西和價錢連起來",
+              "pairs": [
+                ["sweater", "$30"],
+                ["shoes", "$50"],
+                ["present", "flowers and a card"]
+              ],
+              "tags": ["reading", "prices"]
             }
           ]
         },
@@ -1108,6 +1290,17 @@
               "options": ["獸醫", "廚師", "飛行員"],
               "answer": 0,
               "tags": ["reading", "jobs"]
+            },
+            {
+              "id": "u03-r3-q9",
+              "type": "match",
+              "prompt": "把問題和回答連起來",
+              "pairs": [
+                ["What do you do?", "I'm a vet."],
+                ["Is that cat sick?", "Yes, it is."],
+                ["What's the matter?", "It has a fever."]
+              ],
+              "tags": ["reading"]
             }
           ]
         }

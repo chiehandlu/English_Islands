@@ -7,6 +7,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { buildingPlacement, ISLAND_CENTERS, ISLAND_ORDER } from "@/content/world";
 import { flowIslands, getFlow } from "@/content/flows";
 import type { IslandId } from "@/game/types";
+import { farmCenter } from "@/scene/farm";
 import { type Vec2, centroid } from "@/scene/layout";
 import type { Selection } from "@/lib/selection";
 
@@ -43,6 +44,9 @@ function framing(selection: Selection, viewport: { width: number; height: number
   if (selection?.kind === "island" && selection.id in ISLAND_CENTERS) {
     return { target: ISLAND_CENTERS[selection.id as IslandId], zoom: 55 };
   }
+  if (selection?.kind === "farm") {
+    return { target: farmCenter(), zoom: 42 };
+  }
   if (selection?.kind === "flow") {
     const flow = getFlow(selection.id);
     if (flow)
@@ -51,10 +55,7 @@ function framing(selection: Selection, viewport: { width: number; height: number
         12,
       );
   }
-  return fit(
-    ISLAND_ORDER.map((id) => ISLAND_CENTERS[id]),
-    10,
-  );
+  return fit([...ISLAND_ORDER.map((id) => ISLAND_CENTERS[id]), farmCenter()], 10);
 }
 
 interface Props {

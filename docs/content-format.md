@@ -196,4 +196,5 @@ Unit（單元）
 - spell：小寫字母、14 字元以內
 - order：tokens 接起來等於 answer
 - match：2 到 5 對、右欄不重複
+- 閱讀島每棟至少一題 match（農場的鑰匙只從這裡來）
 - explain 60 字以內

@@ -7,9 +7,10 @@ export type Selection =
   | { kind: "island"; id: string }
   | { kind: "building"; id: string }
   | { kind: "flow"; id: string }
+  | { kind: "farm"; id: string }
   | null;
 
-const KINDS = ["island", "building", "flow"] as const;
+const KINDS = ["island", "building", "flow", "farm"] as const;
 
 export function parseSelection(hash: string): Selection {
   const params = new URLSearchParams(hash.replace(/^#/, ""));
