@@ -84,7 +84,7 @@ docs/
 
 1. **規則與畫面分離**：星等、解鎖、判題、錯題排程、獎勵計算寫在 `src/game/`；座標換算、小人移動、燈光計算、農場格子寫在 `src/scene/`。兩者都必須是無副作用的純函式並有測試。元件和 store 只呼叫它們，不自行計算。
 2. **內容即資料**：新增單元只加 `src/content/units/uNN.json` 和 `index.ts` 一行，不改引擎與場景元件。島的位置由單元順序推導（`islands.ts` 的 `CLUSTER_OFFSETS` / `CLUSTER_STEP`），內容檔不寫座標。
-3. **一單元三島＋複習島**：內容檔的 `kind` 固定 `vocab` / `grammar` / `reading` 各一；每島 1–5 棟（六角島只有這麼多格），單字島人寫的最多 4 棟。`content/islands.ts` 推導時自動加上：單字島第 5 棟 `uNN-spell`（`generated: "dictation"`，題目來自全單元 `cards`，`mode: "dictation"`）與第四座島 `uNN-review`（`kind: "review"`，三棟 `generated: "review"` 各對應一種 `reviewKind`，`questions` 為空，出題時由 `review.ts` 的 `reviewSet` 動態組）。單元完成（`unitComplete`）與全三星只看三座課程島（`coreIslandsOfUnit`）；複習島在單元完成前 `islandStatus` 為 `locked`。材料掉落照題目原本的島（`originKind`）。`content.test.ts` 會檢查。
+3. **一單元三島＋複習島**：內容檔的 `kind` 固定 `vocab` / `grammar` / `reading` 各一；每島人寫的 1–4 棟（文法島、閱讀島兩邊有橋只剩 4 格；單字島第 5 格給拼字練習）。`content/islands.ts` 推導時自動加上：單字島第 5 棟 `uNN-spell`（`generated: "dictation"`，題目來自全單元 `cards`，`mode: "dictation"`）與第四座島 `uNN-review`（`kind: "review"`，三棟 `generated: "review"` 各對應一種 `reviewKind`，`questions` 為空，出題時由 `review.ts` 的 `reviewSet` 動態組）。單元完成（`unitComplete`）與全三星只看三座課程島（`coreIslandsOfUnit`）；複習島在單元完成前 `islandStatus` 為 `locked`。材料掉落照題目原本的島（`originKind`）。`content.test.ts` 會檢查。
 4. **進度只存五樣**：`player`、`progress`（每棟 `stars`/`best`/`attempts`）、`mistakes`（錯題與下次複習日）、`questionStats`（每題累計 `wrong`/`right`/`lastWrong`）、`farm`（背包、寵物、裝飾、每日計數、已領里程碑）。島與單元的狀態一律由此推導。星星只升不降，農場的東西只進不出（拆裝飾退一半材料是唯一例外）。「常錯題」＝`troubleScore = wrong×2 − right > 0`，答對會慢慢抵銷。
 5. **星等**：答對率 ≥ 0.9 三顆、≥ 0.7 兩顆、≥ 0.5 一顆；一顆星以上＝亮燈。改門檻只改 `engine.ts` 的 `starsForRatio` 與測試。
    **獎勵**：金幣 1/2/3、首次全對 +2、每棟每天前 5 次全額；材料每答對一題掉一個，依「島 × 題型」查 `content/farm.ts` 的 `dropFor`。數字都在 `rewards.ts` 的 `REWARD_CONFIG` 與 `farm.ts` 的 `FARM_CONFIG`。結算順序固定：`recordResult` → `applyRunRewards` → `claimMilestones`（`gameStore.finishQuiz`）。
@@ -125,7 +125,7 @@ docs/
 3. `npm test`：`content.test.ts` 會抓 id 重複、棟數、題數、選項數、拼字字元、閱讀 match 等問題；修內容而不是改測試。
 4. `npm run build` 確認過，commit、push `main`，Cloudflare 約 40 秒後上線。iPad 重新整理即可，舊存檔不受影響。
 
-目前只有 Unit 3「People in Town」（11 棟人寫＋1 棟拼字練習＋複習島 3 棟）。
+目前有 Unit 3「People in Town」（11 棟人寫）和 Unit 4「Getting Together」（12 棟人寫），各加 1 棟拼字練習＋複習島 3 棟。
 
 ## 部署
 

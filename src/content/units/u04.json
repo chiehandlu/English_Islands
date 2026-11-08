@@ -1,0 +1,1426 @@
+{
+  "id": "u04",
+  "number": 4,
+  "title": "Getting Together",
+  "titleZh": "家人聚一起",
+  "islands": [
+    {
+      "id": "u04-vocab",
+      "kind": "vocab",
+      "name": "單字島",
+      "buildings": [
+        {
+          "id": "u04-v1",
+          "name": "我的家人",
+          "emoji": "👨‍👩‍👧",
+          "intro": "認識家人的英文：爸媽、爺爺奶奶、阿姨叔叔和表兄弟姊妹。",
+          "cards": [
+            {
+              "en": "parents",
+              "zh": "父母"
+            },
+            {
+              "en": "grandparents",
+              "zh": "祖父母、外祖父母"
+            },
+            {
+              "en": "aunt",
+              "zh": "阿姨、姑姑、伯母"
+            },
+            {
+              "en": "uncle",
+              "zh": "叔叔、舅舅、伯伯"
+            },
+            {
+              "en": "cousin",
+              "zh": "堂／表兄弟姊妹"
+            },
+            {
+              "en": "cousins",
+              "zh": "堂／表兄弟姊妹（很多個）"
+            },
+            {
+              "en": "sister",
+              "zh": "姊妹"
+            },
+            {
+              "en": "family",
+              "zh": "家人"
+            }
+          ],
+          "questions": [
+            {
+              "id": "u04-v1-q1",
+              "type": "listen",
+              "say": "grandparents",
+              "prompt": "聽聽看，這是誰？",
+              "options": ["祖父母", "父母", "阿姨"],
+              "answer": 0,
+              "tags": ["family"]
+            },
+            {
+              "id": "u04-v1-q2",
+              "type": "listen",
+              "say": "uncle",
+              "prompt": "聽聽看，這是誰？",
+              "options": ["叔叔", "阿姨", "姊妹"],
+              "answer": 0,
+              "tags": ["family"]
+            },
+            {
+              "id": "u04-v1-q3",
+              "type": "listen",
+              "say": "cousin",
+              "prompt": "聽聽看，這是誰？",
+              "options": ["堂／表兄弟姊妹", "叔叔", "父母"],
+              "answer": 0,
+              "tags": ["family"],
+              "explain": "cousin 是堂／表兄弟姊妹，男生女生都叫 cousin。"
+            },
+            {
+              "id": "u04-v1-q4",
+              "type": "choice",
+              "prompt": "「阿姨」的英文是？",
+              "options": ["aunt", "uncle", "cousin"],
+              "answer": 0,
+              "tags": ["family"]
+            },
+            {
+              "id": "u04-v1-q5",
+              "type": "choice",
+              "prompt": "「父母」的英文是？",
+              "options": ["parents", "grandparents", "family"],
+              "answer": 0,
+              "tags": ["family"]
+            },
+            {
+              "id": "u04-v1-q6",
+              "type": "match",
+              "prompt": "把家人和中文連起來",
+              "pairs": [
+                ["parents", "父母"],
+                ["grandparents", "祖父母"],
+                ["aunt", "阿姨"],
+                ["uncle", "叔叔"]
+              ],
+              "tags": ["family"]
+            },
+            {
+              "id": "u04-v1-q7",
+              "type": "spell",
+              "prompt": "祖父母",
+              "say": "grandparents",
+              "answer": "grandparents",
+              "explain": "grandparents = grand + parents。",
+              "tags": ["spelling", "family"]
+            },
+            {
+              "id": "u04-v1-q8",
+              "type": "spell",
+              "prompt": "堂／表兄弟姊妹",
+              "say": "cousin",
+              "answer": "cousin",
+              "explain": "cousin 中間是 ou，唸起來像 ㄚ。",
+              "tags": ["spelling", "family"]
+            },
+            {
+              "id": "u04-v1-q9",
+              "type": "choice",
+              "prompt": "Hwan has three ______.",
+              "say": "Hwan has three cousins.",
+              "options": ["cousins", "cousin", "cousines"],
+              "answer": 0,
+              "explain": "三個是很多個，cousin 後面加 s 變 cousins。",
+              "tags": ["family", "plural"]
+            }
+          ]
+        },
+        {
+          "id": "u04-v2",
+          "name": "餐桌上",
+          "emoji": "🍽️",
+          "intro": "桌上的叉子、刀子、湯匙、盤子、碗和杯子。",
+          "cards": [
+            {
+              "en": "fork",
+              "zh": "叉子"
+            },
+            {
+              "en": "knife",
+              "zh": "刀子"
+            },
+            {
+              "en": "knives",
+              "zh": "刀子（很多把）"
+            },
+            {
+              "en": "spoon",
+              "zh": "湯匙"
+            },
+            {
+              "en": "plate",
+              "zh": "盤子"
+            },
+            {
+              "en": "bowl",
+              "zh": "碗"
+            },
+            {
+              "en": "cup",
+              "zh": "杯子"
+            }
+          ],
+          "questions": [
+            {
+              "id": "u04-v2-q1",
+              "type": "listen",
+              "say": "spoon",
+              "prompt": "聽聽看，這是什麼？",
+              "options": ["湯匙", "叉子", "碗"],
+              "answer": 0,
+              "tags": ["table"]
+            },
+            {
+              "id": "u04-v2-q2",
+              "type": "listen",
+              "say": "cup",
+              "prompt": "聽聽看，這是什麼？",
+              "options": ["杯子", "帽子", "盤子"],
+              "answer": 0,
+              "tags": ["table", "cup"],
+              "explain": "cup 是杯子；cap 才是帽子，聽的時候注意中間的音。"
+            },
+            {
+              "id": "u04-v2-q3",
+              "type": "listen",
+              "say": "plate",
+              "prompt": "聽聽看，這是什麼？",
+              "options": ["盤子", "碗", "刀子"],
+              "answer": 0,
+              "tags": ["table"]
+            },
+            {
+              "id": "u04-v2-q4",
+              "type": "choice",
+              "prompt": "「碗」的英文是？",
+              "options": ["bowl", "plate", "cup"],
+              "answer": 0,
+              "tags": ["table"]
+            },
+            {
+              "id": "u04-v2-q5",
+              "type": "choice",
+              "prompt": "「杯子」的英文是？",
+              "options": ["cup", "cap", "cat"],
+              "answer": 0,
+              "explain": "杯子是 cup，中間是 u。",
+              "tags": ["table", "cup"]
+            },
+            {
+              "id": "u04-v2-q6",
+              "type": "match",
+              "prompt": "把餐具和中文連起來",
+              "pairs": [
+                ["fork", "叉子"],
+                ["knife", "刀子"],
+                ["spoon", "湯匙"],
+                ["bowl", "碗"],
+                ["plate", "盤子"]
+              ],
+              "tags": ["table"]
+            },
+            {
+              "id": "u04-v2-q7",
+              "type": "spell",
+              "prompt": "湯匙",
+              "say": "spoon",
+              "answer": "spoon",
+              "explain": "spoon 最後是 n，不要漏掉喔。",
+              "tags": ["spelling", "table"]
+            },
+            {
+              "id": "u04-v2-q8",
+              "type": "spell",
+              "prompt": "刀子",
+              "say": "knife",
+              "answer": "knife",
+              "explain": "knife 開頭的 k 不發音，但是要寫。",
+              "tags": ["spelling", "table"]
+            },
+            {
+              "id": "u04-v2-q9",
+              "type": "choice",
+              "prompt": "one knife, two ______",
+              "say": "one knife, two knives",
+              "options": ["knives", "knifes", "knife"],
+              "answer": 0,
+              "explain": "knife 變複數時，fe 要改成 ves。",
+              "tags": ["table", "plural"]
+            }
+          ]
+        },
+        {
+          "id": "u04-v3",
+          "name": "餐廳與用具",
+          "emoji": "🥢",
+          "intro": "在餐廳吃東西會用到的字，還有剪刀、尺、電腦這些用具。",
+          "cards": [
+            {
+              "en": "restaurant",
+              "zh": "餐廳"
+            },
+            {
+              "en": "noodles",
+              "zh": "麵"
+            },
+            {
+              "en": "chopsticks",
+              "zh": "筷子"
+            },
+            {
+              "en": "tacos",
+              "zh": "墨西哥塔可餅"
+            },
+            {
+              "en": "lunch",
+              "zh": "午餐"
+            },
+            {
+              "en": "soup",
+              "zh": "湯"
+            },
+            {
+              "en": "salad",
+              "zh": "沙拉"
+            },
+            {
+              "en": "hands",
+              "zh": "手"
+            },
+            {
+              "en": "scissors",
+              "zh": "剪刀"
+            },
+            {
+              "en": "ruler",
+              "zh": "尺"
+            },
+            {
+              "en": "computer",
+              "zh": "電腦"
+            }
+          ],
+          "questions": [
+            {
+              "id": "u04-v3-q1",
+              "type": "listen",
+              "say": "chopsticks",
+              "prompt": "聽聽看，這是什麼？",
+              "options": ["筷子", "剪刀", "叉子"],
+              "answer": 0,
+              "tags": ["tools"]
+            },
+            {
+              "id": "u04-v3-q2",
+              "type": "listen",
+              "say": "scissors",
+              "prompt": "聽聽看，這是什麼？",
+              "options": ["剪刀", "尺", "電腦"],
+              "answer": 0,
+              "tags": ["tools"]
+            },
+            {
+              "id": "u04-v3-q3",
+              "type": "choice",
+              "prompt": "「尺」的英文是？",
+              "options": ["ruler", "computer", "scissors"],
+              "answer": 0,
+              "tags": ["tools"]
+            },
+            {
+              "id": "u04-v3-q4",
+              "type": "choice",
+              "prompt": "「餐廳」的英文是？",
+              "options": ["restaurant", "lunch", "noodles"],
+              "answer": 0,
+              "tags": ["food"]
+            },
+            {
+              "id": "u04-v3-q5",
+              "type": "match",
+              "prompt": "把英文和中文連起來",
+              "pairs": [
+                ["noodles", "麵"],
+                ["tacos", "塔可餅"],
+                ["soup", "湯"],
+                ["lunch", "午餐"]
+              ],
+              "tags": ["food"]
+            },
+            {
+              "id": "u04-v3-q6",
+              "type": "spell",
+              "prompt": "沙拉",
+              "say": "salad",
+              "answer": "salad",
+              "explain": "salad 最後還有一個 d：s-a-l-a-d。",
+              "tags": ["spelling", "food"]
+            },
+            {
+              "id": "u04-v3-q7",
+              "type": "spell",
+              "prompt": "筷子",
+              "say": "chopsticks",
+              "answer": "chopsticks",
+              "explain": "chopsticks = chop + sticks。",
+              "tags": ["spelling", "tools"]
+            },
+            {
+              "id": "u04-v3-q8",
+              "type": "choice",
+              "prompt": "Soup and ______ for lunch.",
+              "say": "Soup and salad for lunch.",
+              "options": ["salad", "sala", "salat"],
+              "answer": 0,
+              "explain": "沙拉是 salad，最後有 d。",
+              "tags": ["food", "spelling"]
+            },
+            {
+              "id": "u04-v3-q9",
+              "type": "listen",
+              "say": "No problem!",
+              "prompt": "聽聽看，Mike 說了什麼？",
+              "options": ["不客氣、沒問題！", "看起來很好吃！", "像這樣。"],
+              "answer": 0,
+              "tags": ["phrases"]
+            }
+          ]
+        },
+        {
+          "id": "u04-v4",
+          "name": "國家與國旗",
+          "emoji": "🚩",
+          "intro": "四個國家和國旗的顏色：墨西哥、日本、俄羅斯、土耳其。",
+          "cards": [
+            {
+              "en": "Mexico",
+              "zh": "墨西哥"
+            },
+            {
+              "en": "Japan",
+              "zh": "日本"
+            },
+            {
+              "en": "Russia",
+              "zh": "俄羅斯"
+            },
+            {
+              "en": "Türkiye",
+              "zh": "土耳其"
+            },
+            {
+              "en": "flag",
+              "zh": "國旗"
+            },
+            {
+              "en": "circle",
+              "zh": "圓形"
+            },
+            {
+              "en": "country",
+              "zh": "國家"
+            },
+            {
+              "en": "green",
+              "zh": "綠色"
+            },
+            {
+              "en": "white",
+              "zh": "白色"
+            },
+            {
+              "en": "red",
+              "zh": "紅色"
+            },
+            {
+              "en": "blue",
+              "zh": "藍色"
+            },
+            {
+              "en": "yellow",
+              "zh": "黃色"
+            }
+          ],
+          "questions": [
+            {
+              "id": "u04-v4-q1",
+              "type": "listen",
+              "say": "Japan",
+              "prompt": "聽聽看，這是哪個國家？",
+              "options": ["日本", "墨西哥", "俄羅斯"],
+              "answer": 0,
+              "tags": ["countries"]
+            },
+            {
+              "id": "u04-v4-q2",
+              "type": "listen",
+              "say": "Russia",
+              "prompt": "聽聽看，這是哪個國家？",
+              "options": ["俄羅斯", "土耳其", "日本"],
+              "answer": 0,
+              "tags": ["countries"]
+            },
+            {
+              "id": "u04-v4-q3",
+              "type": "listen",
+              "say": "circle",
+              "prompt": "聽聽看，這是什麼？",
+              "options": ["圓形", "國旗", "國家"],
+              "answer": 0,
+              "tags": ["countries"]
+            },
+            {
+              "id": "u04-v4-q4",
+              "type": "choice",
+              "prompt": "「國旗」的英文是？",
+              "options": ["flag", "country", "circle"],
+              "answer": 0,
+              "tags": ["countries"]
+            },
+            {
+              "id": "u04-v4-q5",
+              "type": "choice",
+              "prompt": "「墨西哥」的英文怎麼拼？",
+              "options": ["Mexico", "Mesico", "Maxico"],
+              "answer": 0,
+              "explain": "Mexico 中間是 x，不是 s。",
+              "tags": ["countries", "spelling"]
+            },
+            {
+              "id": "u04-v4-q6",
+              "type": "match",
+              "prompt": "把國家和國旗的顏色連起來",
+              "pairs": [
+                ["Mexico", "綠、白、紅"],
+                ["Japan", "白底紅圓"],
+                ["Russia", "白、藍、紅"],
+                ["Türkiye", "紅和白"]
+              ],
+              "tags": ["countries", "colors"]
+            },
+            {
+              "id": "u04-v4-q7",
+              "type": "spell",
+              "prompt": "墨西哥",
+              "say": "Mexico",
+              "answer": "mexico",
+              "explain": "Mexico：M-e-x-i-c-o，中間是 x。",
+              "tags": ["spelling", "countries"]
+            },
+            {
+              "id": "u04-v4-q8",
+              "type": "spell",
+              "prompt": "俄羅斯",
+              "say": "Russia",
+              "answer": "russia",
+              "explain": "Russia 中間有兩個 s。",
+              "tags": ["spelling", "countries"]
+            },
+            {
+              "id": "u04-v4-q9",
+              "type": "choice",
+              "prompt": "Japan's flag has a red ______.",
+              "say": "Japan's flag has a red circle.",
+              "options": ["circle", "flag", "country"],
+              "answer": 0,
+              "tags": ["countries"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "u04-grammar",
+      "kind": "grammar",
+      "name": "文法島",
+      "buildings": [
+        {
+          "id": "u04-g1",
+          "name": "誰的家人",
+          "emoji": "👪",
+          "intro": "用 's 說「某人的家人」，用 Who's he? 問「他是誰」。",
+          "notes": [
+            "名字加 's 表示「誰的」：Danny's parents",
+            "Who are they? → They're his parents.",
+            "Who's he? → He's her uncle.",
+            "Who's = Who is"
+          ],
+          "questions": [
+            {
+              "id": "u04-g1-q1",
+              "type": "choice",
+              "prompt": "They're ______ parents.",
+              "say": "They're Danny's parents.",
+              "options": ["Danny's", "Danny", "Dannys"],
+              "answer": 0,
+              "explain": "「Danny 的」要在名字後面加 's。",
+              "tags": ["possessive-s"]
+            },
+            {
+              "id": "u04-g1-q2",
+              "type": "choice",
+              "prompt": "She's ______ aunt.",
+              "say": "She's Paul's aunt.",
+              "options": ["Paul's", "Paul", "Pauls"],
+              "answer": 0,
+              "explain": "「Paul 的阿姨」，名字後面加 's。",
+              "tags": ["possessive-s"]
+            },
+            {
+              "id": "u04-g1-q3",
+              "type": "choice",
+              "prompt": "Who ______ they?",
+              "say": "Who are they?",
+              "options": ["are", "is", "am"],
+              "answer": 0,
+              "explain": "they 是很多人，用 are。",
+              "tags": ["who"]
+            },
+            {
+              "id": "u04-g1-q4",
+              "type": "choice",
+              "prompt": "Who's he? — ______ his uncle.",
+              "say": "Who's he? He's his uncle.",
+              "options": ["He's", "She's", "They're"],
+              "answer": 0,
+              "explain": "問 he（他），就用 He's 回答。",
+              "tags": ["who"]
+            },
+            {
+              "id": "u04-g1-q5",
+              "type": "choice",
+              "prompt": "Who are they? — ______ her grandparents.",
+              "say": "Who are they? They're her grandparents.",
+              "options": ["They're", "He's", "She's"],
+              "answer": 0,
+              "explain": "問 they（他們），就用 They're 回答。",
+              "tags": ["who"]
+            },
+            {
+              "id": "u04-g1-q6",
+              "type": "choice",
+              "prompt": "Who's ______? — She's Danny's cousin.",
+              "say": "Who's she? She's Danny's cousin.",
+              "options": ["she", "he", "they"],
+              "answer": 0,
+              "explain": "回答是 She's，所以問的是 she。",
+              "tags": ["who"]
+            },
+            {
+              "id": "u04-g1-q7",
+              "type": "order",
+              "prompt": "把字排成句子：他們是 Danny 的父母。",
+              "tokens": ["They're", "Danny's", "parents."],
+              "answer": "They're Danny's parents.",
+              "explain": "They're 開頭，再說 Danny's parents。",
+              "tags": ["possessive-s", "order"]
+            },
+            {
+              "id": "u04-g1-q8",
+              "type": "order",
+              "prompt": "把字排成句子：她是 Danny 的阿姨。",
+              "tokens": ["She's", "Danny's", "aunt."],
+              "answer": "She's Danny's aunt.",
+              "explain": "She's 開頭，再說 Danny's aunt。",
+              "tags": ["possessive-s", "order"]
+            },
+            {
+              "id": "u04-g1-q9",
+              "type": "choice",
+              "prompt": "How many ______ do you have?",
+              "say": "How many cousins do you have?",
+              "options": ["cousins", "cousin", "cousines"],
+              "answer": 0,
+              "explain": "How many 問數量，後面的名詞要用複數。",
+              "tags": ["plural"]
+            }
+          ]
+        },
+        {
+          "id": "u04-g2",
+          "name": "我的、我們的",
+          "emoji": "🍴",
+          "intro": "my fork 和 It's mine 有什麼不一樣？後面有東西用 my，單獨用 mine。our／ours、their／theirs 也一樣。",
+          "notes": [
+            "後面接東西：my / your / his / her",
+            "單獨用：mine / yours / his / hers",
+            "後面接東西：our / their；單獨用：ours / theirs",
+            "It's hers. 不能說 It's her."
+          ],
+          "questions": [
+            {
+              "id": "u04-g2-q1",
+              "type": "choice",
+              "prompt": "This fork is ______.",
+              "say": "This fork is mine.",
+              "options": ["mine", "my", "me"],
+              "answer": 0,
+              "explain": "句子最後沒有東西了，要用 mine。",
+              "tags": ["mine-yours"]
+            },
+            {
+              "id": "u04-g2-q2",
+              "type": "choice",
+              "prompt": "This is ______ fork.",
+              "say": "This is my fork.",
+              "options": ["my", "mine", "me"],
+              "answer": 0,
+              "explain": "後面還有 fork，要用 my。",
+              "tags": ["mine-yours"]
+            },
+            {
+              "id": "u04-g2-q3",
+              "type": "choice",
+              "prompt": "Whose cup is that? — It's ______.（她的）",
+              "say": "Whose cup is that? It's hers.",
+              "options": ["hers", "her", "she"],
+              "answer": 0,
+              "explain": "單獨放在句子最後，「她的」要用 hers，不能用 her。",
+              "tags": ["mine-yours", "hers"]
+            },
+            {
+              "id": "u04-g2-q4",
+              "type": "choice",
+              "prompt": "That plate is ______.（她的）",
+              "say": "That plate is hers.",
+              "options": ["hers", "her", "she"],
+              "answer": 0,
+              "explain": "後面沒有東西，要用 hers，結尾的 s 不能漏。",
+              "tags": ["mine-yours", "hers"]
+            },
+            {
+              "id": "u04-g2-q5",
+              "type": "choice",
+              "prompt": "This plate isn't mine. It's ______.（你的）",
+              "say": "This plate isn't mine. It's yours.",
+              "options": ["yours", "your", "you"],
+              "answer": 0,
+              "explain": "單獨用的「你的」是 yours。",
+              "tags": ["mine-yours"]
+            },
+            {
+              "id": "u04-g2-q6",
+              "type": "choice",
+              "prompt": "This bowl is ______.（他的）",
+              "say": "This bowl is his.",
+              "options": ["his", "him", "he"],
+              "answer": 0,
+              "explain": "「他的」不管有沒有接東西都是 his。",
+              "tags": ["mine-yours"]
+            },
+            {
+              "id": "u04-g2-q7",
+              "type": "order",
+              "prompt": "把字排成句子：這把叉子是我的。",
+              "tokens": ["This", "fork", "is", "mine."],
+              "answer": "This fork is mine.",
+              "explain": "This fork 是主角，最後放 mine。",
+              "tags": ["mine-yours", "order"]
+            },
+            {
+              "id": "u04-g2-q8",
+              "type": "order",
+              "prompt": "把字排成句子：那個盤子是她的。",
+              "tokens": ["That", "plate", "is", "hers."],
+              "answer": "That plate is hers.",
+              "explain": "That plate 開頭，最後用 hers。",
+              "tags": ["mine-yours", "hers", "order"]
+            },
+            {
+              "id": "u04-g2-q9",
+              "type": "choice",
+              "prompt": "This is ______ flag. It's ours.",
+              "say": "This is our flag. It's ours.",
+              "options": ["our", "ours", "we"],
+              "answer": 0,
+              "explain": "後面接 flag，要用 our。",
+              "tags": ["ours-theirs"]
+            },
+            {
+              "id": "u04-g2-q10",
+              "type": "choice",
+              "prompt": "They're from Russia. This is their flag. It's ______.",
+              "say": "They're from Russia. This is their flag. It's theirs.",
+              "options": ["theirs", "their", "they"],
+              "answer": 0,
+              "explain": "句尾單獨用，要用 theirs，s 不能漏。",
+              "tags": ["ours-theirs"]
+            },
+            {
+              "id": "u04-g2-q11",
+              "type": "choice",
+              "prompt": "We're from Japan. This flag is ______.",
+              "say": "We're from Japan. This flag is ours.",
+              "options": ["ours", "our", "we"],
+              "answer": 0,
+              "explain": "句尾單獨用的「我們的」是 ours。",
+              "tags": ["ours-theirs"]
+            },
+            {
+              "id": "u04-g2-q12",
+              "type": "match",
+              "prompt": "把人和「誰的」連起來",
+              "pairs": [
+                ["I", "mine"],
+                ["you", "yours"],
+                ["she", "hers"],
+                ["we", "ours"],
+                ["they", "theirs"]
+              ],
+              "tags": ["mine-yours", "ours-theirs"]
+            }
+          ]
+        },
+        {
+          "id": "u04-g3",
+          "name": "Whose 問句",
+          "emoji": "❓",
+          "intro": "Whose 問「誰的」，Who's 問「是誰」，聽起來很像要分清楚。",
+          "notes": [
+            "Whose fork is that? 這是誰的叉子？",
+            "Who's he? = Who is he? 他是誰？",
+            "一個東西：Whose … is this? → It's mine.",
+            "很多東西：Whose … are these? → They're mine."
+          ],
+          "questions": [
+            {
+              "id": "u04-g3-q1",
+              "type": "choice",
+              "prompt": "______ fork is that? — It's mine.",
+              "say": "Whose fork is that? It's mine.",
+              "options": ["Whose", "Who's", "Who"],
+              "answer": 0,
+              "explain": "問「誰的叉子」要用 Whose。",
+              "tags": ["whose"]
+            },
+            {
+              "id": "u04-g3-q2",
+              "type": "choice",
+              "prompt": "______ he? — He's my uncle.",
+              "say": "Who's he? He's my uncle.",
+              "options": ["Who's", "Whose", "What"],
+              "answer": 0,
+              "explain": "問「他是誰」用 Who's，就是 Who is。",
+              "tags": ["whose"]
+            },
+            {
+              "id": "u04-g3-q3",
+              "type": "choice",
+              "prompt": "Whose noodles ______ these?",
+              "say": "Whose noodles are these?",
+              "options": ["are", "is", "am"],
+              "answer": 0,
+              "explain": "these 是很多個，用 are。",
+              "tags": ["this-these"]
+            },
+            {
+              "id": "u04-g3-q4",
+              "type": "choice",
+              "prompt": "Whose noodles are these? — ______ mine.",
+              "say": "Whose noodles are these? They're mine.",
+              "options": ["They're", "It's", "He's"],
+              "answer": 0,
+              "explain": "noodles 是很多條，回答用 They're。",
+              "tags": ["this-these"]
+            },
+            {
+              "id": "u04-g3-q5",
+              "type": "choice",
+              "prompt": "What are these? — ______ chopsticks.",
+              "say": "What are these? They're chopsticks.",
+              "options": ["They're", "It's", "She's"],
+              "answer": 0,
+              "explain": "these 很多個，回答用 They're。",
+              "tags": ["this-these"]
+            },
+            {
+              "id": "u04-g3-q6",
+              "type": "choice",
+              "prompt": "What is this? — ______ a spoon.",
+              "say": "What is this? It's a spoon.",
+              "options": ["It's", "They're", "He's"],
+              "answer": 0,
+              "explain": "this 只有一個，回答用 It's。",
+              "tags": ["this-these"]
+            },
+            {
+              "id": "u04-g3-q7",
+              "type": "choice",
+              "prompt": "Whose ______ is that? — It's hers.（女孩拿著杯子）",
+              "say": "Whose cup is that? It's hers.",
+              "options": ["cup", "cap", "cups"],
+              "answer": 0,
+              "explain": "杯子是 cup；is that 是一個，不加 s。",
+              "tags": ["whose", "cup"]
+            },
+            {
+              "id": "u04-g3-q8",
+              "type": "order",
+              "prompt": "把字排成句子：這些麵是誰的？",
+              "tokens": ["Whose", "noodles", "are", "these?"],
+              "answer": "Whose noodles are these?",
+              "explain": "Whose noodles 開頭，再接 are these。",
+              "tags": ["whose", "order"]
+            },
+            {
+              "id": "u04-g3-q9",
+              "type": "order",
+              "prompt": "把字排成句子：這個盤子是誰的？",
+              "tokens": ["Whose", "plate", "is", "this?"],
+              "answer": "Whose plate is this?",
+              "explain": "Whose plate 開頭，再接 is this。",
+              "tags": ["whose", "order"]
+            },
+            {
+              "id": "u04-g3-q10",
+              "type": "listen",
+              "say": "Whose fork is that?",
+              "prompt": "聽聽看，他在問什麼？",
+              "options": ["那是誰的叉子？", "他是誰？", "那是什麼？"],
+              "answer": 0,
+              "tags": ["whose"],
+              "explain": "Whose 是「誰的」，所以是在問叉子是誰的。"
+            }
+          ]
+        },
+        {
+          "id": "u04-g4",
+          "name": "怎麼使用",
+          "emoji": "✂️",
+          "intro": "用 How do you use …? 問東西怎麼用，回答 Like this.",
+          "notes": [
+            "How do you use chopsticks? → Like this.",
+            "可以換成 scissors、a ruler、a computer",
+            "Can you use chopsticks? → Yes, I can.",
+            "knife 的複數是 knives"
+          ],
+          "questions": [
+            {
+              "id": "u04-g4-q1",
+              "type": "choice",
+              "prompt": "How do you ______ chopsticks?",
+              "say": "How do you use chopsticks?",
+              "options": ["use", "uses", "using"],
+              "answer": 0,
+              "explain": "do you 後面的動詞用原形 use。",
+              "tags": ["how-use"]
+            },
+            {
+              "id": "u04-g4-q2",
+              "type": "choice",
+              "prompt": "How do you use scissors? — ______",
+              "say": "How do you use scissors? Like this.",
+              "options": ["Like this.", "It's mine.", "They're chopsticks."],
+              "answer": 0,
+              "explain": "問怎麼用，就示範說 Like this.（像這樣）。",
+              "tags": ["how-use"]
+            },
+            {
+              "id": "u04-g4-q3",
+              "type": "choice",
+              "prompt": "Can you use chopsticks? — Yes, I ______.",
+              "say": "Can you use chopsticks? Yes, I can.",
+              "options": ["can", "am", "do"],
+              "answer": 0,
+              "explain": "用 Can 問，就用 can 回答。",
+              "tags": ["how-use"]
+            },
+            {
+              "id": "u04-g4-q4",
+              "type": "choice",
+              "prompt": "How do you use a knife and ______?",
+              "say": "How do you use a knife and fork?",
+              "options": ["fork", "forks", "fork's"],
+              "answer": 0,
+              "explain": "a knife and fork 是一組，fork 不用加 s。",
+              "tags": ["how-use", "plural"]
+            },
+            {
+              "id": "u04-g4-q5",
+              "type": "choice",
+              "prompt": "We don't use ______ and forks.",
+              "say": "We don't use knives and forks.",
+              "options": ["knives", "knifes", "knife"],
+              "answer": 0,
+              "explain": "knife 很多把時，要改成 knives。",
+              "tags": ["plural"]
+            },
+            {
+              "id": "u04-g4-q6",
+              "type": "order",
+              "prompt": "把字排成句子：尺要怎麼用？",
+              "tokens": ["How", "do", "you", "use", "a", "ruler?"],
+              "answer": "How do you use a ruler?",
+              "explain": "How do you use 開頭，再接 a ruler。",
+              "tags": ["how-use", "order"]
+            },
+            {
+              "id": "u04-g4-q7",
+              "type": "order",
+              "prompt": "把字排成句子：你會用筷子嗎？",
+              "tokens": ["Can", "you", "use", "chopsticks?"],
+              "answer": "Can you use chopsticks?",
+              "explain": "問「會不會」用 Can you 開頭。",
+              "tags": ["how-use", "order"]
+            },
+            {
+              "id": "u04-g4-q8",
+              "type": "listen",
+              "say": "How do you use a computer?",
+              "prompt": "聽聽看，他在問什麼？",
+              "options": ["電腦要怎麼用？", "剪刀要怎麼用？", "這是誰的電腦？"],
+              "answer": 0,
+              "tags": ["how-use"],
+              "explain": "How do you use 是「要怎麼用」，後面是 computer（電腦）。"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "u04-reading",
+      "kind": "reading",
+      "name": "閱讀島",
+      "buildings": [
+        {
+          "id": "u04-r1",
+          "name": "Chopsticks!",
+          "emoji": "🍜",
+          "intro": "Danny 和 Mike 一家人去餐廳吃麵。先把故事每一句點來聽，再回答問題。",
+          "passage": [
+            "Danny, Mike, and Mike's family are at a restaurant.",
+            "Server: Whose noodles are these?",
+            "Danny: They're mine. Mmm, they look good.",
+            "Danny: Where's my fork? What are these?",
+            "Mike: They're chopsticks.",
+            "Danny: How do you use chopsticks?",
+            "Mike: Like this.",
+            "Danny: This is fun. Thanks, Mike!",
+            "Mike: No problem!"
+          ],
+          "questions": [
+            {
+              "id": "u04-r1-q1",
+              "type": "yesno",
+              "prompt": "Danny and Mike are at a restaurant.",
+              "say": "Danny and Mike are at a restaurant.",
+              "answer": true,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r1-q2",
+              "type": "yesno",
+              "prompt": "They have knives and forks.",
+              "say": "They have knives and forks.",
+              "answer": false,
+              "explain": "他們用的是筷子，不是刀子和叉子。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r1-q3",
+              "type": "yesno",
+              "prompt": "Mike can use chopsticks.",
+              "say": "Mike can use chopsticks.",
+              "answer": true,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r1-q4",
+              "type": "yesno",
+              "prompt": "Danny doesn't like noodles.",
+              "say": "Danny doesn't like noodles.",
+              "answer": false,
+              "explain": "Danny 說 they look good，他覺得麵看起來很好吃。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r1-q5",
+              "type": "choice",
+              "prompt": "Whose noodles are they?",
+              "say": "Whose noodles are they?",
+              "options": ["Danny's", "Mike's", "The server's"],
+              "answer": 0,
+              "explain": "Danny 說 They're mine.，所以是 Danny 的。",
+              "tags": ["reading", "whose"]
+            },
+            {
+              "id": "u04-r1-q6",
+              "type": "choice",
+              "prompt": "Who teaches Danny to use chopsticks?",
+              "say": "Who teaches Danny to use chopsticks?",
+              "options": ["Mike", "The server", "Mike's family"],
+              "answer": 0,
+              "explain": "Mike 說 Like this. 示範給 Danny 看。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r1-q7",
+              "type": "choice",
+              "prompt": "Danny says “Thanks, Mike!” Mike says: “______”",
+              "say": "No problem!",
+              "options": ["No problem!", "Like this.", "They're mine."],
+              "answer": 0,
+              "tags": ["reading", "phrases"]
+            },
+            {
+              "id": "u04-r1-q8",
+              "type": "choice",
+              "prompt": "這個故事想告訴我們什麼？",
+              "options": ["Be helpful.（樂於助人）", "Be quiet.（保持安靜）", "Be fast.（動作快）"],
+              "answer": 0,
+              "explain": "Mike 教 Danny 用筷子，就是樂於助人。",
+              "tags": ["reading", "value"]
+            },
+            {
+              "id": "u04-r1-q9",
+              "type": "match",
+              "prompt": "把人和他說的話連起來",
+              "pairs": [
+                ["Server", "Whose noodles are these?"],
+                ["Danny", "Where's my fork?"],
+                ["Mike", "Like this."]
+              ],
+              "tags": ["reading"]
+            }
+          ]
+        },
+        {
+          "id": "u04-r2",
+          "name": "國旗",
+          "emoji": "🚩",
+          "intro": "四個國家的小朋友介紹自己的國旗。先把每一句點來聽，再回答問題。",
+          "passage": [
+            "We're from Mexico. This is our flag. It's ours. It's green, white, and red.",
+            "We're from Japan. This is our flag. It has a red circle. It's ours.",
+            "They're from Russia. This is their flag. Russia's flag is white, blue, and red. It's theirs.",
+            "They're from Türkiye. This is their flag. It's theirs. It's red and white."
+          ],
+          "questions": [
+            {
+              "id": "u04-r2-q1",
+              "type": "yesno",
+              "prompt": "Mexico's flag is green and blue.",
+              "say": "Mexico's flag is green and blue.",
+              "answer": false,
+              "explain": "墨西哥國旗是綠、白、紅，沒有藍色。",
+              "tags": ["reading", "colors"]
+            },
+            {
+              "id": "u04-r2-q2",
+              "type": "yesno",
+              "prompt": "Japan's flag has a red circle.",
+              "say": "Japan's flag has a red circle.",
+              "answer": true,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r2-q3",
+              "type": "yesno",
+              "prompt": "Russia's flag is blue and yellow.",
+              "say": "Russia's flag is blue and yellow.",
+              "answer": false,
+              "explain": "俄羅斯國旗是白、藍、紅，沒有黃色。",
+              "tags": ["reading", "colors"]
+            },
+            {
+              "id": "u04-r2-q4",
+              "type": "yesno",
+              "prompt": "Türkiye's flag is red and white.",
+              "say": "Türkiye's flag is red and white.",
+              "answer": true,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r2-q5",
+              "type": "choice",
+              "prompt": "Which flag has a red circle?",
+              "say": "Which flag has a red circle?",
+              "options": ["Japan's flag", "Mexico's flag", "Russia's flag"],
+              "answer": 0,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r2-q6",
+              "type": "choice",
+              "prompt": "Russia's flag is white, blue, and ______.",
+              "say": "Russia's flag is white, blue, and red.",
+              "options": ["red", "green", "yellow"],
+              "answer": 0,
+              "tags": ["reading", "colors"]
+            },
+            {
+              "id": "u04-r2-q7",
+              "type": "choice",
+              "prompt": "They're from Türkiye. This is ______ flag.",
+              "say": "They're from Türkiye. This is their flag.",
+              "options": ["their", "our", "theirs"],
+              "answer": 0,
+              "explain": "They 的國旗用 their，後面接 flag。",
+              "tags": ["reading", "ours-theirs"]
+            },
+            {
+              "id": "u04-r2-q8",
+              "type": "choice",
+              "prompt": "We're ______ Mexico.",
+              "say": "We're from Mexico.",
+              "options": ["from", "of", "for"],
+              "answer": 0,
+              "explain": "說「來自哪裡」用 from。",
+              "tags": ["reading", "from"]
+            },
+            {
+              "id": "u04-r2-q9",
+              "type": "yesno",
+              "prompt": "Taiwan's flag is red, blue, and white.",
+              "say": "Taiwan's flag is red, blue, and white.",
+              "answer": true,
+              "tags": ["reading", "colors"]
+            },
+            {
+              "id": "u04-r2-q10",
+              "type": "match",
+              "prompt": "把國家和國旗連起來",
+              "pairs": [
+                ["Mexico", "綠、白、紅"],
+                ["Japan", "紅色圓形"],
+                ["Russia", "白、藍、紅"],
+                ["Türkiye", "紅和白"]
+              ],
+              "tags": ["reading", "countries"]
+            }
+          ]
+        },
+        {
+          "id": "u04-r3",
+          "name": "My Food Blog",
+          "emoji": "🌮",
+          "intro": "Antonio 介紹他和表妹 Elena 的午餐。先把每一句點來聽，再回答問題。",
+          "passage": [
+            "I'm Antonio. This is my cousin, Elena.",
+            "We're from Mexico.",
+            "We like to eat a plate of tacos for lunch. They taste good.",
+            "We don't use knives and forks, we eat with our hands."
+          ],
+          "questions": [
+            {
+              "id": "u04-r3-q1",
+              "type": "yesno",
+              "prompt": "Antonio and Elena are from Russia.",
+              "say": "Antonio and Elena are from Russia.",
+              "answer": false,
+              "explain": "他們來自墨西哥（Mexico）。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r3-q2",
+              "type": "yesno",
+              "prompt": "Elena is Antonio's cousin.",
+              "say": "Elena is Antonio's cousin.",
+              "answer": true,
+              "tags": ["reading", "family"]
+            },
+            {
+              "id": "u04-r3-q3",
+              "type": "yesno",
+              "prompt": "They have a bowl of noodles for lunch.",
+              "say": "They have a bowl of noodles for lunch.",
+              "answer": false,
+              "explain": "他們午餐吃的是一盤塔可餅（a plate of tacos）。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r3-q4",
+              "type": "yesno",
+              "prompt": "They use knives and forks to eat tacos.",
+              "say": "They use knives and forks to eat tacos.",
+              "answer": false,
+              "explain": "他們不用刀叉，是用手吃（with our hands）。",
+              "tags": ["reading", "hands"]
+            },
+            {
+              "id": "u04-r3-q5",
+              "type": "yesno",
+              "prompt": "They use chopsticks to eat tacos.",
+              "say": "They use chopsticks to eat tacos.",
+              "answer": false,
+              "explain": "短文說 we eat with our hands，是用手吃，不是筷子。",
+              "tags": ["reading", "hands"]
+            },
+            {
+              "id": "u04-r3-q6",
+              "type": "choice",
+              "prompt": "What do they use to eat tacos?",
+              "say": "What do they use to eat tacos?",
+              "options": ["Their hands.", "Chopsticks.", "Knives and forks."],
+              "answer": 0,
+              "explain": "We eat with our hands. 他們用手吃。",
+              "tags": ["reading", "hands"]
+            },
+            {
+              "id": "u04-r3-q7",
+              "type": "choice",
+              "prompt": "What do they eat for lunch?",
+              "say": "What do they eat for lunch?",
+              "options": ["A plate of tacos.", "A bowl of noodles.", "Soup and salad."],
+              "answer": 0,
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r3-q8",
+              "type": "choice",
+              "prompt": "Who is Elena?",
+              "say": "Who is Elena?",
+              "options": ["Antonio's cousin.", "Antonio's aunt.", "Antonio's sister."],
+              "answer": 0,
+              "tags": ["reading", "family"]
+            },
+            {
+              "id": "u04-r3-q9",
+              "type": "match",
+              "prompt": "把短文裡的字和中文連起來",
+              "pairs": [
+                ["tacos", "塔可餅"],
+                ["lunch", "午餐"],
+                ["hands", "手"],
+                ["taste good", "嚐起來很好吃"]
+              ],
+              "tags": ["reading"]
+            }
+          ]
+        },
+        {
+          "id": "u04-r4",
+          "name": "Paul 和 Nick",
+          "emoji": "🏙️",
+          "intro": "兩篇小短文：Paul 去鎮上拜訪家人、Nick 生病在家。先點來聽，再回答問題。",
+          "passage": [
+            "Paul is visiting his family in town.",
+            "First, Paul goes to the supermarket. His aunt works there. She's a cashier.",
+            "Then, Paul goes to the library. Paul's uncle works at the library. He's a librarian.",
+            "Next, Paul visits his cousin at the post office. His cousin is a postal worker.",
+            "Paul's dad works at the animal hospital. He's a vet.",
+            "Then Paul goes to see his mom. Paul's mom works at the restaurant. She's a server.",
+            "She gives Paul a big sandwich!",
+            "Nick isn't at school today. He's in the living room and he's watching TV.",
+            "What's the matter? He has a fever.",
+            "Nick's mum is a doctor. She works in a hospital. She can help Nick.",
+            "Nick needs lots of water. Nick isn't hungry. He doesn't want any breakfast.",
+            "He can have some soup for lunch. Feel better soon, Nick!"
+          ],
+          "questions": [
+            {
+              "id": "u04-r4-q1",
+              "type": "choice",
+              "prompt": "Paul's uncle is a ______.",
+              "say": "Paul's uncle is a librarian.",
+              "options": ["librarian", "cashier", "pilot"],
+              "answer": 0,
+              "tags": ["reading", "jobs"]
+            },
+            {
+              "id": "u04-r4-q2",
+              "type": "choice",
+              "prompt": "Paul's dad is a ______.",
+              "say": "Paul's dad is a vet.",
+              "options": ["vet", "cook", "pilot"],
+              "answer": 0,
+              "explain": "爸爸在動物醫院工作，是獸醫（vet）。",
+              "tags": ["reading", "jobs"]
+            },
+            {
+              "id": "u04-r4-q3",
+              "type": "yesno",
+              "prompt": "Paul's mom is a cook.",
+              "say": "Paul's mom is a cook.",
+              "answer": false,
+              "explain": "Paul 的媽媽在餐廳當服務生（server）。",
+              "tags": ["reading", "jobs"]
+            },
+            {
+              "id": "u04-r4-q4",
+              "type": "match",
+              "prompt": "把 Paul 的家人和工作連起來",
+              "pairs": [
+                ["aunt", "cashier"],
+                ["uncle", "librarian"],
+                ["cousin", "postal worker"],
+                ["dad", "vet"],
+                ["mom", "server"]
+              ],
+              "tags": ["reading", "jobs", "family"]
+            },
+            {
+              "id": "u04-r4-q5",
+              "type": "choice",
+              "prompt": "He's in the living room and he's ______ TV.",
+              "say": "He's in the living room and he's watching TV.",
+              "options": ["watching", "watch", "watches"],
+              "answer": 0,
+              "explain": "he's 後面接動詞要加 ing：watching。",
+              "tags": ["reading", "present-continuous"]
+            },
+            {
+              "id": "u04-r4-q6",
+              "type": "choice",
+              "prompt": "What's the matter? ______ has a fever.",
+              "say": "What's the matter? He has a fever.",
+              "options": ["He", "Him", "They"],
+              "answer": 0,
+              "explain": "句子開頭當主詞，用 He。",
+              "tags": ["reading", "pronoun"]
+            },
+            {
+              "id": "u04-r4-q7",
+              "type": "choice",
+              "prompt": "Nick's mum ______ a doctor.",
+              "say": "Nick's mum is a doctor.",
+              "options": ["is", "are", "am"],
+              "answer": 0,
+              "explain": "Nick's mum 是一個人，用 is。",
+              "tags": ["reading", "be"]
+            },
+            {
+              "id": "u04-r4-q8",
+              "type": "choice",
+              "prompt": "He ______ want any breakfast.",
+              "say": "He doesn't want any breakfast.",
+              "options": ["doesn't", "don't", "does"],
+              "answer": 0,
+              "explain": "He 的否定用 doesn't，後面接原形 want。",
+              "tags": ["reading", "3sg-s"]
+            },
+            {
+              "id": "u04-r4-q9",
+              "type": "choice",
+              "prompt": "He can have some soup ______ lunch.",
+              "say": "He can have some soup for lunch.",
+              "options": ["for", "of", "in"],
+              "answer": 0,
+              "explain": "「當午餐」說 for lunch。",
+              "tags": ["reading"]
+            },
+            {
+              "id": "u04-r4-q10",
+              "type": "yesno",
+              "prompt": "Nick is hungry.",
+              "say": "Nick is hungry.",
+              "answer": false,
+              "explain": "短文說 Nick isn't hungry，他不餓。",
+              "tags": ["reading"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

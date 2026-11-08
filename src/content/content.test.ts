@@ -61,10 +61,10 @@ describe("content", () => {
       expect(island.buildings.length, island.id).toBeGreaterThanOrEqual(1);
       expect(island.buildings.length, island.id).toBeLessThanOrEqual(5);
     }
-    // 單字島最多 4 棟人寫的，第 5 棟留給拼字練習
+    // 每座課程島人寫的最多 4 棟：文法島、閱讀島兩邊都有橋，只剩 4 格；單字島第 5 棟留給拼字練習
     for (const u of UNITS) {
-      const vocab = u.islands.find((i) => i.kind === "vocab")!;
-      expect(vocab.buildings.length, u.id).toBeLessThanOrEqual(4);
+      for (const island of u.islands)
+        expect(island.buildings.length, island.id).toBeLessThanOrEqual(4);
     }
   });
 
