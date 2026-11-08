@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { maxTotalStars, totalStars } from "@/game/engine";
 import { useGameStore, useHasHydrated } from "@/store/gameStore";
+import { useUiStore } from "@/store/uiStore";
 
 const AVATARS = ["🦊", "🐱", "🐼", "🦄", "🐸", "🦖"];
 
@@ -11,7 +11,7 @@ export function StartCard() {
   const hydrated = useHasHydrated();
   const { player, setPlayer } = useGameStore();
   const game = useGameStore();
-  const router = useRouter();
+  const setView = useUiStore((s) => s.setView);
   if (!hydrated) return null;
 
   return (
@@ -35,11 +35,7 @@ export function StartCard() {
         placeholder="你的名字（可以不填）"
         className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-center text-lg"
       />
-      <button
-        type="button"
-        onClick={() => router.push("/play/")}
-        className="btn-primary w-full text-xl"
-      >
+      <button type="button" onClick={() => setView("play")} className="btn-primary w-full text-xl">
         出發 🚤
       </button>
       {totalStars(game) > 0 && (

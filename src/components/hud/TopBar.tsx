@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { maxTotalStars, totalStars } from "@/game/engine";
 import { dueMistakes, toDateString } from "@/game/review";
 import { select } from "@/lib/selection";
@@ -36,9 +35,13 @@ export function TopBar() {
         >
           🎒 錯題袋 {due}
         </button>
-        <Link href="/report" className="text-sm text-neutral-500 underline">
+        <button
+          type="button"
+          onClick={() => ui.setView("report")}
+          className="text-sm text-neutral-500 underline"
+        >
           家長
-        </Link>
+        </button>
       </div>
       <div className="glass-card pointer-events-auto flex gap-1 p-1">
         {TOGGLES.map(({ key, label }) => (

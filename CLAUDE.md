@@ -37,8 +37,9 @@ npm run format     # Prettier
 
 ```
 src/
-  app/               # 路由：/（選頭像、出發）、/play（3D 群島）、/report（家長頁）
+  app/               # 只有一個路由 /；畫面由 uiStore.view 切換（home / play / report）
   components/
+    App.tsx          # view 切換；StartCard（首頁）、ReportView（家長頁）
     scene/           # R3F 3D 元件：World、Islands、Bridges、FlowArcs、Walkers、CameraRig
     hud/             # 疊在 canvas 上的 DOM 介面：TopBar、IndexPanel、DetailCard、QuizPanel
   game/              # 純 TS 遊戲規則：types、engine（星等／解鎖）、quiz（出題／判題）、review（錯題袋）、dayClock
@@ -65,13 +66,16 @@ docs/
 5. **星等**：答對率 ≥ 0.9 三顆、≥ 0.7 兩顆、≥ 0.5 一顆；一顆星以上＝亮燈。改門檻只改 `engine.ts` 的 `starsForRatio` 與測試。
 6. **存檔相容**：改動 `GameState` 結構時，調升 `gameStore.ts` 的 `persist.version` 並更新 `migrate`。
 7. **Hydration**：讀取 `gameStore` 的頁面要先用 `useHasHydrated()` 判斷。3D 世界用 `next/dynamic`（`ssr: false`）載入。
-8. **選取**：島、建築、協作線、清單的點擊一律呼叫 `select()`，不要另存選取狀態。答題面板的開關存在 `uiStore.quiz`。
-9. **3D 實作注意**：
-   - 大量重複物件（小人）用 `InstancedMesh`，每幀在 `useFrame` 裡更新矩陣。
-   - drei `<Html>` 名牌一律掛載，以 `hidden` 切換顯示，並傳 `portal={labelLayer}`。
-   - 場景色票集中在 `components/scene/palette.ts`，與 `globals.css` 保持一致。
-   - 鏡頭動畫只在 `CameraRig` 裡處理；左側詳情卡與右側清單的寬度會傳進去讓鏡頭避開。
-10. 優先用 Server Component；只有需要互動、store 或 WebGL 的元件才加 `"use client"`。
+8. **選取**：島、建築、協作線、清單的點擊一律呼叫 `select()`，不要另存選取狀態。答題面板的開關存在 `uiStore.quiz`，首頁／島嶼／家長頁的切換存在 `uiStore.view`。
+9. **單一路由**：不新增 `app/` 路由、不用 `next/link` 或 `router.push`。靜態主機可能把網站放在子路徑（例如 Claude artifact 的 `/_f/<版本>/`），只有單一 `index.html` 加相對資源路徑才能在任何地方跑。
+10. **3D 實作注意**：
+
+- 大量重複物件（小人）用 `InstancedMesh`，每幀在 `useFrame` 裡更新矩陣。
+- drei `<Html>` 名牌一律掛載，以 `hidden` 切換顯示，並傳 `portal={labelLayer}`。
+- 場景色票集中在 `components/scene/palette.ts`，與 `globals.css` 保持一致。
+- 鏡頭動畫只在 `CameraRig` 裡處理；左側詳情卡與右側清單的寬度會傳進去讓鏡頭避開。
+
+11. 優先用 Server Component；只有需要互動、store 或 WebGL 的元件才加 `"use client"`。
 
 ## 給小朋友用的介面規則
 
@@ -87,9 +91,12 @@ docs/
 
 ## 部署
 
-- `npm run build` 產生 `out/`，直接放 Cloudflare Pages（build command `npm run build`，output `out`）。
-- 網址是公開的；上線後用 Cloudflare Access 或簡單 PIN 擋一下。
-- 無後端、無帳號、不收集個資；進度在裝置的 localStorage。
+兩條路，內容與程式完全相同：
+
+- **Cloudflare Pages**（長期）：`npm run build` 產生 `out/`，build command `npm run build`、output `out`。網址公開，上線後用 Cloudflare Access 或簡單 PIN 擋一下。
+- **Claude artifact**（隨手試玩、iPad 立刻開）：`npm run build:artifact`（相對資源路徑 `./assets`），再把 `out/` 發佈成 artifact 檔案：`_next/**` 對應到 `assets/_next/**`，根目錄 `_` 開頭的檔案（`__next.*.txt`、`_not-found/`）不上傳（伺服器保留 `_` 前綴）。artifact 的 slug 記在 `docs/deploy.md`。
+
+無後端、無帳號、不收集個資；進度在裝置的 localStorage。
 
 ## 實作進度
 

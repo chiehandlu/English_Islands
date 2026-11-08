@@ -1,17 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { Stars } from "@/components/hud/Stars";
 import { UNITS, findQuestion, islandsOfUnit } from "@/content/islands";
 import { maxTotalStars, progressOf, totalStars, unitStatus } from "@/game/engine";
 import { useGameStore, useHasHydrated } from "@/store/gameStore";
+import { useUiStore } from "@/store/uiStore";
 
 const KIND = { vocab: "單字", grammar: "文法", reading: "閱讀" } as const;
 
 /** 家長頁：每棟的星數與挑戰次數、錯題袋內容、重設。 */
-export default function ReportPage() {
+export function ReportView() {
   const hydrated = useHasHydrated();
   const game = useGameStore();
+  const setView = useUiStore((s) => s.setView);
   if (!hydrated) return null;
 
   const tagCounts: Record<string, number> = {};
@@ -32,9 +33,9 @@ export default function ReportPage() {
             {game.player.avatar} {game.player.name || "小朋友"}的學習紀錄
           </h1>
         </div>
-        <Link href="/play/" className="btn-primary">
+        <button type="button" onClick={() => setView("play")} className="btn-primary">
           回到島上
-        </Link>
+        </button>
       </header>
 
       <section className="glass-card p-5">
