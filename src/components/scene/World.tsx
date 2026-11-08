@@ -48,7 +48,7 @@ function leftInsetFor(width: number, hasSelection: boolean): number {
 export default function World() {
   const selection = useSelection();
   const game = useGameStore();
-  const { showLabels, showCarry, showFlows, paused, panelOpen } = useUiStore();
+  const { showLabels, showWalkers, showFlows, paused, panelOpen } = useUiStore();
   const width = useViewportWidth();
   const rightInset = rightInsetFor(width, panelOpen);
   const leftInset = leftInsetFor(width, selection !== null);
@@ -100,7 +100,7 @@ export default function World() {
         />
         <FarmIsland selection={selection} showLabels={showLabels} labelLayer={labelLayer} />
         {showFlows && <FlowArcs selection={selection} />}
-        <Walkers selection={selection} paused={paused} showCarry={showCarry} />
+        <Walkers selection={selection} paused={paused} showWalkers={showWalkers} />
         <MapControls makeDefault enableRotate={false} minZoom={12} maxZoom={180} />
         <CameraRig selection={selection} rightInset={rightInset} leftInset={leftInset} />
       </Canvas>

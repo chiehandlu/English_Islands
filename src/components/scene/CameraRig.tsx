@@ -11,6 +11,7 @@ import { farmCenter, farmRadius } from "@/scene/farm";
 import { type Vec2, centroid } from "@/scene/layout";
 import type { Selection } from "@/lib/selection";
 import { useGameStore } from "@/store/gameStore";
+import { useUiStore } from "@/store/uiStore";
 
 /** 等角視角：相機永遠從目標點的這個方向看過去。 */
 export const CAMERA_OFFSET = new Vector3(30, 34, 30);
@@ -95,6 +96,7 @@ export function CameraRig({ selection, rightInset, leftInset }: Props) {
     t: number;
   } | null>(null);
   const farmExpanded = useGameStore((s) => s.farm.landExpanded);
+  const recenterAt = useUiStore((s) => s.recenterAt);
   const key = selection ? `${selection.kind}:${selection.id}` : "all";
 
   useEffect(() => {
@@ -117,8 +119,8 @@ export function CameraRig({ selection, rightInset, leftInset }: Props) {
     const cancel = () => (anim.current = null);
     controls.addEventListener("start", cancel);
     return () => controls.removeEventListener("start", cancel);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- 只在選取或視窗大小改變時重新飛行
-  }, [key, controls, size.width, size.height, rightInset, leftInset, farmExpanded]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 只在選取、視窗大小改變或按「全景」時重新飛行
+  }, [key, recenterAt, controls, size.width, size.height, rightInset, leftInset, farmExpanded]);
 
   useFrame((state, dt) => {
     const a = anim.current;

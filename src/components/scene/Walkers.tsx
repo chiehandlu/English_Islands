@@ -21,11 +21,11 @@ const ISLAND_Y = 0.7;
 interface Props {
   selection: Selection;
   paused: boolean;
-  showCarry: boolean;
+  showWalkers: boolean;
 }
 
 /** 走動小人：三個 InstancedMesh（身體／頭／道具）一次畫出全部小人。 */
-export function Walkers({ selection, paused, showCarry }: Props) {
+export function Walkers({ selection, paused, showWalkers }: Props) {
   const routes = useMemo(() => buildRoutes(FLOWS, ISLAND_ORDER, ISLAND_CENTERS), []);
   const walkers = useRef(createWalkers(routes, WALKERS_PER_ROUTE));
   const count = routes.length * WALKERS_PER_ROUTE;
@@ -55,7 +55,7 @@ export function Walkers({ selection, paused, showCarry }: Props) {
       const next = step > 0 ? stepWalker(w, route, step).state : w;
       walkers.current[i] = next;
 
-      const visible = !selectedFlow || selectedFlow === route.flowId;
+      const visible = showWalkers && (!selectedFlow || selectedFlow === route.flowId);
       const [x, z] = positionOnRoute(route, next.progress);
       // 靠近島中心時走在地面上，橋上時略低
       const nearIsland = route.waypoints.some(([wx, wz]) => Math.hypot(wx - x, wz - z) < 2.6);
@@ -76,7 +76,7 @@ export function Walkers({ selection, paused, showCarry }: Props) {
       heads.current?.setMatrixAt(i, dummy.matrix);
 
       dummy.position.y = ground + 0.88 + bounce;
-      dummy.scale.setScalar(visible && showCarry && isCarrying(next, route) ? 1 : 0);
+      dummy.scale.setScalar(visible && isCarrying(next, route) ? 1 : 0);
       dummy.updateMatrix();
       carries.current?.setMatrixAt(i, dummy.matrix);
     });

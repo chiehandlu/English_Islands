@@ -11,7 +11,7 @@ export type View = "home" | "play" | "report";
 /** 純介面開關（不存檔）。 */
 interface UiStore {
   showLabels: boolean;
-  showCarry: boolean;
+  showWalkers: boolean;
   showFlows: boolean;
   paused: boolean;
   panelOpen: boolean;
@@ -21,14 +21,17 @@ interface UiStore {
   /** 農場小鐘最後一次響的時間（performance.now），寵物會跳一下 */
   bellAt: number;
   ringBell: () => void;
-  toggle: (key: "showLabels" | "showCarry" | "showFlows" | "paused" | "panelOpen") => void;
+  toggle: (key: "showLabels" | "showWalkers" | "showFlows" | "paused" | "panelOpen") => void;
   openQuiz: (target: QuizTarget) => void;
   closeQuiz: () => void;
+  /** 最後一次按「全景」的時間；就算目前沒選東西，鏡頭也會飛回全景 */
+  recenterAt: number;
+  recenter: () => void;
 }
 
 export const useUiStore = create<UiStore>()((set) => ({
   showLabels: true,
-  showCarry: true,
+  showWalkers: true,
   showFlows: true,
   // 系統設定「減少動態效果」時，小人與標記預設暫停
   paused:
@@ -43,4 +46,6 @@ export const useUiStore = create<UiStore>()((set) => ({
   toggle: (key) => set((s) => ({ [key]: !s[key] })),
   openQuiz: (target) => set({ quiz: target }),
   closeQuiz: () => set({ quiz: null }),
+  recenterAt: 0,
+  recenter: () => set({ recenterAt: performance.now() }),
 }));

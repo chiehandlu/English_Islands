@@ -11,7 +11,7 @@ import { useUiStore } from "@/store/uiStore";
 
 const TOGGLES = [
   { key: "showLabels", label: "名牌" },
-  { key: "showCarry", label: "小人" },
+  { key: "showWalkers", label: "小人" },
   { key: "paused", label: "暫停" },
 ] as const;
 
@@ -102,7 +102,10 @@ export function TopBar() {
         ))}
         <button
           type="button"
-          onClick={() => select(null)}
+          onClick={() => {
+            select(null);
+            ui.recenter();
+          }}
           className="tool-button"
           aria-pressed={false}
         >
