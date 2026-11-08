@@ -9,6 +9,8 @@
 
 ## Cloudflare Pages（正式版）
 
-- GitHub repo：https://github.com/chiehandlu/English_Islands（`main` 分支，push 就自動部署）
+- 網址：https://english-islands.pages.dev （Pages 專案 `english-islands`）
+- GitHub repo：https://github.com/chiehandlu/English_Islands（`main` 分支，push 就自動部署；其他分支會產生 preview 網址）
+- 環境變數 `NODE_VERSION=22`（與 `.node-version` 相同，雙保險）
 - 設定：Framework preset = Next.js (Static HTML Export)，build command `npm run build`，output directory `out`。
 - Node 版本由根目錄 `.node-version`（22）決定；Cloudflare 預設的 Node 18 跑不動 Next 16。

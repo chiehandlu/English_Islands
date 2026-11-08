@@ -116,4 +116,5 @@ docs/
 - [ ] 錯題袋提醒（今天有幾題到期）與「每日任務」
 - [ ] 口說題（語音辨識比對）
 - [ ] 多位小朋友的存檔切換
-- [ ] 部署到 Cloudflare Pages 並加存取限制
+- [x] 部署到 Cloudflare Pages（https://english-islands.pages.dev，push `main` 自動部署）
+- [ ] 存取限制（Cloudflare Access 或簡單 PIN）
