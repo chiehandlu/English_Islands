@@ -18,10 +18,13 @@ import {
   STAGE_LABELS,
   barnCapacity,
   countDecor,
+  decorSlotCount,
+  displaySlotCount,
   fedToday,
   freeDecorSlot,
   growthToNext,
   hasDecor,
+  landAvailable,
   missingFor,
   petCapacity,
   petStage,
@@ -44,9 +47,9 @@ export function FarmCard() {
       <p className="mono-label">FARM</p>
       <h2 className="mt-1 text-2xl font-bold">🐔 農場</h2>
       <p className="mt-1 text-sm text-neutral-500">
-        島上 {petsOutside(farm).length} / {FARM_CONFIG.displaySlots}・小屋 {petsInBarn(farm).length}{" "}
-        / {barnCapacity(farm)}・裝飾 {farm.decor.filter((d) => d.slot !== null).length} /{" "}
-        {FARM_CONFIG.decorSlots}
+        島上 {petsOutside(farm).length} / {displaySlotCount(farm)}・小屋 {petsInBarn(farm).length} /{" "}
+        {barnCapacity(farm)}・裝飾 {farm.decor.filter((d) => d.slot !== null).length} /{" "}
+        {decorSlotCount(farm)}・{farm.landExpanded ? "37 格" : "19 格"}
       </p>
       <div role="tablist" className="mt-3 flex gap-1">
         {(
@@ -228,7 +231,7 @@ function PetsTab() {
                 <button
                   type="button"
                   onClick={() => game.sendOut(pet.id)}
-                  disabled={petsOutside(farm).length >= FARM_CONFIG.displaySlots}
+                  disabled={petsOutside(farm).length >= displaySlotCount(farm)}
                   className="chip min-h-10 px-3 disabled:opacity-40"
                 >
                   出去玩
@@ -323,8 +326,11 @@ function ShopTab() {
             const missing = missingFor(inv, kind.price);
             const count = countDecor(farm, kind.id);
             const maxed = kind.maxCount !== undefined && count >= kind.maxCount;
-            const noSlot = kind.effect !== "barn_plus_3" && freeDecorSlot(farm) === null;
-            const ok = Object.keys(missing).length === 0 && !maxed && !noSlot;
+            const takesSlot = kind.effect !== "barn_plus_3" && kind.effect !== "land";
+            const noSlot = takesSlot && freeDecorSlot(farm) === null;
+            const locked = Boolean(kind.requiresUnitComplete) && !landAvailable(farm);
+            const ok = Object.keys(missing).length === 0 && !maxed && !noSlot && !locked;
+            if (kind.effect === "land" && maxed) return null;
             const unlocks = kind.unlocksPet ? getPetKind(kind.unlocksPet) : undefined;
             return (
               <li
@@ -347,6 +353,8 @@ function ShopTab() {
                   <p className="mt-1 text-xs text-neutral-500">
                     {kind.effect === "barn_plus_3" &&
                       `小屋容量 +${FARM_CONFIG.barnPerExpansion}，最多兩次`}
+                    {kind.effect === "land" &&
+                      `島長大到 37 格：寵物位 ${FARM_CONFIG.displaySlots} → ${FARM_CONFIG.displaySlotsExpanded}、裝飾位 ${FARM_CONFIG.decorSlots} → ${FARM_CONFIG.decorSlotsExpanded}`}
                     {kind.effect === "bell" && "點一下，所有寵物跳一下"}
                     {unlocks && `蓋了才能領養 ${unlocks.emoji} ${unlocks.name}`}
                   </p>
@@ -362,6 +370,9 @@ function ShopTab() {
                     </p>
                   )}
                   {noSlot && <p className="mt-1 text-xs text-rose-700">外圈滿了，先拆一件</p>}
+                  {locked && (
+                    <p className="mt-1 text-xs text-rose-700">完成一個單元（三座島全亮）後開放</p>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -369,7 +380,7 @@ function ShopTab() {
                   onClick={() => game.build(kind.id)}
                   className="btn-primary min-h-10 px-4 py-2 disabled:opacity-30"
                 >
-                  {kind.effect === "barn_plus_3" ? "擴建" : "蓋"}
+                  {kind.effect === "barn_plus_3" ? "擴建" : kind.effect === "land" ? "買地" : "蓋"}
                 </button>
               </li>
             );

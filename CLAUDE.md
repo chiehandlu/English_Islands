@@ -44,7 +44,7 @@ src/
     hud/             # 疊在 canvas 上的 DOM 介面：TopBar、IndexPanel、DetailCard、QuizPanel、FarmCard、RewardList
   game/              # 純 TS 遊戲規則：types、engine（星等／解鎖）、quiz（出題／判題）、review（錯題袋）、
                      #   rewards（金幣／掉落／每日上限／里程碑）、farm（領養／餵食／裝飾／上限）、dayClock
-  scene/             # 純 TS 場景數學：六角座標、小人狀態機、燈光內插、farm（農場 19 格與寵物漫步）
+  scene/             # 純 TS 場景數學：六角座標、小人狀態機、燈光內插、farm（農場 19／37 格與寵物漫步）
   content/
     units/           # 內容資料：每單元一個 uNN.json；index.ts 列出所有單元
     farm.ts          # 農場圖鑑：寵物、裝飾、價格、掉落表（資料，改數字不用動程式）
@@ -68,7 +68,7 @@ docs/
 4. **進度只存四樣**：`player`、`progress`（每棟 `stars`/`best`/`attempts`）、`mistakes`（錯題與下次複習日）、`farm`（背包、寵物、裝飾、每日計數、已領里程碑）。島與單元的狀態一律由此推導。星星只升不降，農場的東西只進不出（拆裝飾退一半材料是唯一例外）。
 5. **星等**：答對率 ≥ 0.9 三顆、≥ 0.7 兩顆、≥ 0.5 一顆；一顆星以上＝亮燈。改門檻只改 `engine.ts` 的 `starsForRatio` 與測試。
    **獎勵**：金幣 1/2/3、首次全對 +2、每棟每天前 5 次全額；材料每答對一題掉一個，依「島 × 題型」查 `content/farm.ts` 的 `dropFor`。數字都在 `rewards.ts` 的 `REWARD_CONFIG` 與 `farm.ts` 的 `FARM_CONFIG`。結算順序固定：`recordResult` → `applyRunRewards` → `claimMilestones`（`gameStore.finishQuiz`）。
-   **農場**：島上展示 6 隻、小屋 6（擴建 +3 × 2）、裝飾 12 格；傳說寵物只靠成就。
+   **農場**：19 格＝島上展示 6 隻、裝飾 12 格；小屋 6（擴建 +3 × 2）。「第二圈土地」只能買一次（80 🪙 + 60 🪵 + 40 🧱，完成一個單元後開放）→ 37 格＝展示 12、裝飾 24。再大就會亂，不加第三次。傳說寵物只靠成就。
 6. **存檔相容**：改動 `GameState` 結構時，調升 `gameStore.ts` 的 `persist.version` 並更新 `migrate`。
 7. **Hydration**：讀取 `gameStore` 的頁面要先用 `useHasHydrated()` 判斷。3D 世界用 `next/dynamic`（`ssr: false`）載入。
 8. **選取**：島、建築、協作線、清單的點擊一律呼叫 `select()`，不要另存選取狀態。答題面板的開關存在 `uiStore.quiz`，首頁／島嶼／家長頁的切換存在 `uiStore.view`。

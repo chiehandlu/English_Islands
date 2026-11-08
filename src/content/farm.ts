@@ -219,6 +219,16 @@ export const DECOR_KINDS: DecorKind[] = [
     maxCount: 2,
   },
   { id: "windmill", name: "風車", emoji: "🎡", price: { wood: 40, brick: 25 }, buyable: true },
+  {
+    id: "land",
+    name: "第二圈土地",
+    emoji: "🗺️",
+    price: { coin: 80, wood: 60, brick: 40 },
+    buyable: true,
+    effect: "land",
+    maxCount: 1,
+    requiresUnitComplete: true,
+  },
   { id: "trophy", name: "獎盃庭園", emoji: "🏆", price: {}, buyable: false, effect: "trophy" },
 ];
 

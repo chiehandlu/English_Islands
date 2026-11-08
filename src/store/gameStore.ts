@@ -92,18 +92,15 @@ export const useGameStore = create<GameStore>()(
     },
     {
       name: "english-island-save",
-      // v2：加入農場（inventory、pets、decor、每日計數）
-      version: 2,
+      // v2：加入農場（inventory、pets、decor、每日計數）；v3：農場加 landExpanded
+      version: 3,
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => pickState(s),
       migrate: (persisted, version) => {
         if (version < 1) return createInitialState();
         const old = persisted as Partial<GameState>;
-        return {
-          ...createInitialState(),
-          ...old,
-          farm: old.farm ?? createFarmState(today()),
-        } as GameState;
+        const farm = { ...createFarmState(today()), ...(old.farm ?? {}) };
+        return { ...createInitialState(), ...old, farm } as GameState;
       },
     },
   ),

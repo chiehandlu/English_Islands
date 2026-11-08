@@ -14,10 +14,12 @@ import type {
  * 數字集中在 FARM_CONFIG。
  */
 export const FARM_CONFIG = {
-  /** 島上展示的寵物位（內圈六格） */
+  /** 島上展示的寵物位（內圈六格）；買了第二圈土地再加六格 */
   displaySlots: 6,
-  /** 外圈裝飾格 */
+  displaySlotsExpanded: 12,
+  /** 外圈裝飾格；買了第二圈土地再加十二格 */
   decorSlots: 12,
+  decorSlotsExpanded: 24,
   /** 小屋基本容量與每次擴建 */
   barnBase: 6,
   barnPerExpansion: 3,
@@ -60,6 +62,7 @@ export function createFarmState(today: string): FarmState {
     ],
     decor: [],
     barnExpansions: 0,
+    landExpanded: false,
     runsDate: today,
     runsToday: {},
     islandsToday: [],
@@ -103,8 +106,22 @@ export function barnCapacity(farm: FarmState): number {
   return FARM_CONFIG.barnBase + FARM_CONFIG.barnPerExpansion * farm.barnExpansions;
 }
 
+/** 島上可以站幾隻（買了土地就變多）。 */
+export function displaySlotCount(farm: Pick<FarmState, "landExpanded">): number {
+  return farm.landExpanded ? FARM_CONFIG.displaySlotsExpanded : FARM_CONFIG.displaySlots;
+}
+
+export function decorSlotCount(farm: Pick<FarmState, "landExpanded">): number {
+  return farm.landExpanded ? FARM_CONFIG.decorSlotsExpanded : FARM_CONFIG.decorSlots;
+}
+
 export function petCapacity(farm: FarmState): number {
-  return FARM_CONFIG.displaySlots + barnCapacity(farm);
+  return displaySlotCount(farm) + barnCapacity(farm);
+}
+
+/** 第二圈土地要先完成一個單元（任一 unit 里程碑領過）。 */
+export function landAvailable(farm: Pick<FarmState, "claimed">): boolean {
+  return farm.claimed.some((k) => k.startsWith("unit:"));
 }
 
 export function petsOutside(farm: FarmState): OwnedPet[] {
@@ -116,14 +133,14 @@ export function petsInBarn(farm: FarmState): OwnedPet[] {
 }
 
 export function freeDisplaySlot(farm: FarmState): number | null {
-  for (let i = 0; i < FARM_CONFIG.displaySlots; i++) {
+  for (let i = 0; i < displaySlotCount(farm); i++) {
     if (!farm.pets.some((p) => p.slot === i)) return i;
   }
   return null;
 }
 
 export function freeDecorSlot(farm: FarmState): number | null {
-  for (let i = 0; i < FARM_CONFIG.decorSlots; i++) {
+  for (let i = 0; i < decorSlotCount(farm); i++) {
     if (!farm.decor.some((d) => d.slot === i)) return i;
   }
   return null;
@@ -164,6 +181,7 @@ export type FarmError =
   | "no_food"
   | "not_found"
   | "slot_taken"
+  | "locked"
   | "not_buyable";
 
 export type FarmResult = { ok: true; state: GameState } | { ok: false; error: FarmError };
@@ -224,8 +242,20 @@ export function buyDecor(state: GameState, kindId: string, today: string): FarmR
   const farm = state.farm;
   if (kind.maxCount !== undefined && countDecor(farm, kindId) >= kind.maxCount)
     return { ok: false, error: "max_count" };
+  if (kind.requiresUnitComplete && !landAvailable(farm)) return { ok: false, error: "locked" };
   if (!canAfford(farm.inventory, kind.price)) return { ok: false, error: "not_enough" };
   const inventory = subtractItems(farm.inventory, kind.price);
+  if (kind.effect === "land") {
+    return {
+      ok: true,
+      state: withFarm(state, {
+        ...farm,
+        inventory,
+        landExpanded: true,
+        decor: [...farm.decor, { id: newId("decor", today), kind: kindId, slot: null }],
+      }),
+    };
+  }
   if (kind.effect === "barn_plus_3") {
     return {
       ok: true,
@@ -263,7 +293,7 @@ export function removeDecor(state: GameState, decorId: string): FarmResult {
   const item = farm.decor.find((d) => d.id === decorId);
   if (!item) return { ok: false, error: "not_found" };
   const kind = getDecorKind(item.kind);
-  if (!kind || kind.effect === "barn_plus_3" || kind.effect === "trophy")
+  if (!kind || kind.effect === "barn_plus_3" || kind.effect === "trophy" || kind.effect === "land")
     return { ok: false, error: "not_buyable" };
   const refund: Partial<Inventory> = {};
   for (const [k, v] of Object.entries(kind.price))
@@ -281,7 +311,7 @@ export function removeDecor(state: GameState, decorId: string): FarmResult {
 /** 把裝飾移到另一格（空格才行）。 */
 export function moveDecor(state: GameState, decorId: string, slot: number): FarmResult {
   const farm = state.farm;
-  if (slot < 0 || slot >= FARM_CONFIG.decorSlots) return { ok: false, error: "slot_taken" };
+  if (slot < 0 || slot >= decorSlotCount(farm)) return { ok: false, error: "slot_taken" };
   if (farm.decor.some((d) => d.slot === slot && d.id !== decorId))
     return { ok: false, error: "slot_taken" };
   return {
@@ -332,7 +362,7 @@ export function setPetSlot(state: GameState, petId: string, slot: number | null)
   const farm = state.farm;
   if (!farm.pets.some((p) => p.id === petId)) return { ok: false, error: "not_found" };
   if (slot !== null) {
-    if (slot < 0 || slot >= FARM_CONFIG.displaySlots) return { ok: false, error: "slot_taken" };
+    if (slot < 0 || slot >= displaySlotCount(farm)) return { ok: false, error: "slot_taken" };
     if (farm.pets.some((p) => p.slot === slot && p.id !== petId))
       return { ok: false, error: "slot_taken" };
   } else if (petsInBarn(farm).filter((p) => p.id !== petId).length >= barnCapacity(farm)) {
@@ -384,7 +414,8 @@ export function affordableNow(farm: FarmState): { pets: string[]; decor: string[
       d.buyable &&
       canAfford(farm.inventory, d.price) &&
       (d.maxCount === undefined || countDecor(farm, d.id) < d.maxCount) &&
-      (d.effect === "barn_plus_3" || freeDecorSlot(farm) !== null),
+      (!d.requiresUnitComplete || landAvailable(farm)) &&
+      (d.effect === "barn_plus_3" || d.effect === "land" || freeDecorSlot(farm) !== null),
   ).map((d) => d.id);
   return { pets, decor };
 }

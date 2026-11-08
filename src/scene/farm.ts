@@ -11,7 +11,7 @@ import {
  * 農場島的版面：19 格（中心 1、內圈 6、外圈 12），放在第一個單元左邊隔一格水。
  * 內圈＝寵物位、外圈＝裝飾位。純數學，無副作用。
  */
-export const FARM_AXIAL: [number, number] = [-2, 1];
+export const FARM_AXIAL: [number, number] = [-3, 1];
 
 export function farmCenter(): Vec2 {
   return axialToWorld(FARM_AXIAL, ISLAND_GRID_SIZE);
@@ -33,22 +33,69 @@ export const FARM_RING2: [number, number][] = [
   [1, 1],
 ];
 
+/** 第三圈 18 格（買了第二圈土地才有）：6 個角給寵物、12 個邊給裝飾。 */
+export const FARM_RING3_CORNERS: [number, number][] = [
+  [3, 0],
+  [3, -3],
+  [0, -3],
+  [-3, 0],
+  [-3, 3],
+  [0, 3],
+];
+export const FARM_RING3_EDGES: [number, number][] = [
+  [3, -1],
+  [3, -2],
+  [2, -3],
+  [1, -3],
+  [-1, -2],
+  [-2, -1],
+  [-3, 1],
+  [-3, 2],
+  [-2, 3],
+  [-1, 3],
+  [1, 2],
+  [2, 1],
+];
+
 export const FARM_TILES: [number, number][] = [...ISLAND_TILES, ...FARM_RING2];
+export const FARM_TILES_EXPANDED: [number, number][] = [
+  ...FARM_TILES,
+  ...FARM_RING3_CORNERS,
+  ...FARM_RING3_EDGES,
+];
+
+export function farmTiles(expanded: boolean): [number, number][] {
+  return expanded ? FARM_TILES_EXPANDED : FARM_TILES;
+}
 
 export const PET_SLOTS = 6;
+export const PET_SLOTS_EXPANDED = PET_SLOTS + FARM_RING3_CORNERS.length;
 export const DECOR_SLOTS = FARM_RING2.length;
+export const DECOR_SLOTS_EXPANDED = DECOR_SLOTS + FARM_RING3_EDGES.length;
 
-/** 寵物位＝內圈第 i 格（ISLAND_TILES[1..6]）。 */
+/** 寵物位：0–5 內圈，6–11 第三圈的角。 */
 export function petSlotOffset(slot: number): Vec2 {
-  return axialToWorld(ISLAND_TILES[(slot % PET_SLOTS) + 1], TILE_SIZE);
+  if (slot < PET_SLOTS) return axialToWorld(ISLAND_TILES[slot + 1], TILE_SIZE);
+  return axialToWorld(
+    FARM_RING3_CORNERS[(slot - PET_SLOTS) % FARM_RING3_CORNERS.length],
+    TILE_SIZE,
+  );
 }
 
+/** 裝飾位：0–11 第二圈，12–23 第三圈的邊。 */
 export function decorSlotOffset(slot: number): Vec2 {
-  return axialToWorld(FARM_RING2[slot % DECOR_SLOTS], TILE_SIZE);
+  if (slot < DECOR_SLOTS) return axialToWorld(FARM_RING2[slot], TILE_SIZE);
+  return axialToWorld(FARM_RING3_EDGES[(slot - DECOR_SLOTS) % FARM_RING3_EDGES.length], TILE_SIZE);
 }
 
-/** 島的實際半徑：外圈格中心最遠約 2√3，加上格子本身。 */
-export const FARM_RADIUS = 2 * Math.sqrt(3) * TILE_SIZE + TILE_SIZE * 1.15;
+/** 島的實際半徑：最外圈格中心的距離加上格子本身。 */
+export function farmRadius(expanded: boolean): number {
+  const rings = expanded ? 3 : 2;
+  return rings * Math.sqrt(3) * TILE_SIZE + TILE_SIZE * 1.15;
+}
+
+export const FARM_RADIUS = farmRadius(false);
+export const FARM_RADIUS_EXPANDED = farmRadius(true);
 
 export const PET_WANDER_RADIUS = 0.42;
 export const PET_SPEED = 0.35; // 世界單位／秒

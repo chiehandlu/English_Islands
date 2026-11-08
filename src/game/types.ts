@@ -185,8 +185,10 @@ export interface DecorKind {
   name: string;
   emoji: string;
   price: Partial<Inventory>;
-  /** 小屋擴建不佔格、鐘可以點、獎盃是成就送的 */
-  effect?: "barn_plus_3" | "bell" | "trophy";
+  /** 小屋擴建不佔格、鐘可以點、獎盃是成就送的、土地讓島長大 */
+  effect?: "barn_plus_3" | "bell" | "trophy" | "land";
+  /** 要先完成一個單元（三島全亮）才會出現在商店 */
+  requiresUnitComplete?: boolean;
   /** 最多買幾件；省略為不限 */
   maxCount?: number;
   /** 蓋了之後可以領養的寵物 id（顯示用） */
@@ -218,6 +220,8 @@ export interface FarmState {
   pets: OwnedPet[];
   decor: PlacedDecor[];
   barnExpansions: number;
+  /** 已買第二圈土地：島從 19 格長到 37 格 */
+  landExpanded: boolean;
   /** 每日計數的日期；換日就清 */
   runsDate: string;
   runsToday: Record<string, number>;

@@ -9,13 +9,13 @@ import { petStage } from "@/game/farm";
 import { rng } from "@/game/quiz";
 import type { OwnedPet, PlacedDecor } from "@/game/types";
 import {
-  FARM_RADIUS,
-  FARM_TILES,
   type WanderState,
   createWander,
   decorSlotOffset,
   facing,
   farmCenter,
+  farmRadius,
+  farmTiles,
   petSlotOffset,
   stepWander,
 } from "@/scene/farm";
@@ -41,14 +41,16 @@ export function FarmIsland({ selection, showLabels, labelLayer }: Props) {
   const [cx, cz] = farmCenter();
   const focused = selection?.kind === "farm";
   const open = () => select({ kind: "farm", id: "farm" });
+  const radius = farmRadius(farm.landExpanded);
+  const tiles = farmTiles(farm.landExpanded);
 
   return (
     <group position={[cx, 0, cz]}>
       <mesh position={[0, BASE_HEIGHT / 2, 0]} rotation={[0, Math.PI / 6, 0]} receiveShadow>
-        <cylinderGeometry args={[FARM_RADIUS, FARM_RADIUS + 0.25, BASE_HEIGHT, 6]} />
+        <cylinderGeometry args={[radius, radius + 0.25, BASE_HEIGHT, 6]} />
         <meshStandardMaterial color={SCENE_COLORS.sand} />
       </mesh>
-      {FARM_TILES.map((tile, t) => {
+      {tiles.map((tile, t) => {
         const [ox, oz] = axialToWorld(tile, TILE_SIZE);
         return (
           <mesh

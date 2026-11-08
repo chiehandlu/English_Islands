@@ -6,6 +6,8 @@ import {
   adoptPet,
   affordableNow,
   buyDecor,
+  decorSlotCount,
+  displaySlotCount,
   feedPet,
   grantPet,
   missingFor,
@@ -103,6 +105,29 @@ describe("farm", () => {
     const removed = removeDecor(s, s.farm.decor[0].id);
     expect(removed.ok).toBe(true);
     if (removed.ok) expect(removed.state.farm.inventory.wood).toBe(woodBefore + 5);
+  });
+
+  it("sells the second ring only after a unit is complete, then doubles the slots", () => {
+    const base = rich(createInitialState(DAY), { coin: 100, wood: 100, brick: 100 });
+    expect(buyDecor(base, "land", DAY)).toEqual({ ok: false, error: "locked" });
+    const unlocked = { ...base, farm: { ...base.farm, claimed: ["unit:u03"] } };
+    expect(displaySlotCount(unlocked.farm)).toBe(6);
+    const bought = buyDecor(unlocked, "land", DAY);
+    expect(bought.ok).toBe(true);
+    if (!bought.ok) return;
+    expect(bought.state.farm.landExpanded).toBe(true);
+    expect(displaySlotCount(bought.state.farm)).toBe(12);
+    expect(decorSlotCount(bought.state.farm)).toBe(24);
+    expect(petCapacity(bought.state.farm)).toBe(12 + 6);
+    expect(bought.state.farm.inventory).toMatchObject({ coin: 20, wood: 40, brick: 60 });
+    expect(buyDecor(bought.state, "land", DAY)).toEqual({ ok: false, error: "max_count" });
+    // 第七隻直接站到新的位子，而不是進小屋
+    let s = bought.state;
+    for (let i = 0; i < 6; i++) {
+      const r = grantPet(s, "rabbit", DAY);
+      if (r.ok) s = r.state;
+    }
+    expect(s.farm.pets.filter((p) => p.slot !== null)).toHaveLength(7);
   });
 
   it("moves pets between slots and the barn", () => {

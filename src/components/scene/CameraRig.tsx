@@ -7,9 +7,10 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { buildingPlacement, ISLAND_CENTERS, ISLAND_ORDER } from "@/content/world";
 import { flowIslands, getFlow } from "@/content/flows";
 import type { IslandId } from "@/game/types";
-import { farmCenter } from "@/scene/farm";
+import { farmCenter, farmRadius } from "@/scene/farm";
 import { type Vec2, centroid } from "@/scene/layout";
 import type { Selection } from "@/lib/selection";
+import { useGameStore } from "@/store/gameStore";
 
 /** 等角視角：相機永遠從目標點的這個方向看過去。 */
 export const CAMERA_OFFSET = new Vector3(30, 34, 30);
@@ -27,7 +28,11 @@ function bounds(points: Vec2[]) {
 const SCREEN_RIGHT = new Vector3(1, 0, -1).normalize();
 
 /** 依選取決定鏡頭目標點與縮放（全景 → 島 → 建築三層）。 */
-function framing(selection: Selection, viewport: { width: number; height: number }) {
+function framing(
+  selection: Selection,
+  viewport: { width: number; height: number },
+  farmExpanded: boolean,
+) {
   const fit = (points: Vec2[], pad: number) => {
     const { w, h } = bounds(points);
     // 等角投影下地面寬度約為 x+z 的對角線
@@ -45,7 +50,7 @@ function framing(selection: Selection, viewport: { width: number; height: number
     return { target: ISLAND_CENTERS[selection.id as IslandId], zoom: 55 };
   }
   if (selection?.kind === "farm") {
-    return { target: farmCenter(), zoom: 42 };
+    return { target: farmCenter(), zoom: farmExpanded ? 30 : 42 };
   }
   if (selection?.kind === "flow") {
     const flow = getFlow(selection.id);
@@ -55,7 +60,19 @@ function framing(selection: Selection, viewport: { width: number; height: number
         12,
       );
   }
-  return fit([...ISLAND_ORDER.map((id) => ISLAND_CENTERS[id]), farmCenter()], 10);
+  // 全景要把農場的整個圓都框進來，不只是中心點
+  const [fx, fz] = farmCenter();
+  const r = farmRadius(farmExpanded);
+  return fit(
+    [
+      ...ISLAND_ORDER.map((id) => ISLAND_CENTERS[id]),
+      [fx - r, fz],
+      [fx + r, fz],
+      [fx, fz - r],
+      [fx, fz + r],
+    ],
+    8,
+  );
 }
 
 interface Props {
@@ -77,12 +94,13 @@ export function CameraRig({ selection, rightInset, leftInset }: Props) {
     toZoom: number;
     t: number;
   } | null>(null);
+  const farmExpanded = useGameStore((s) => s.farm.landExpanded);
   const key = selection ? `${selection.kind}:${selection.id}` : "all";
 
   useEffect(() => {
     if (!controls) return;
     const visible = { width: size.width - rightInset - leftInset, height: size.height - 100 };
-    const { target, zoom } = framing(selection, visible);
+    const { target, zoom } = framing(selection, visible, farmExpanded);
     // 讓目標落在「沒被兩側卡片擋住」區域的中央
     const toTarget = new Vector3(target[0], 0, target[1]).addScaledVector(
       SCREEN_RIGHT,
@@ -100,7 +118,7 @@ export function CameraRig({ selection, rightInset, leftInset }: Props) {
     controls.addEventListener("start", cancel);
     return () => controls.removeEventListener("start", cancel);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 只在選取或視窗大小改變時重新飛行
-  }, [key, controls, size.width, size.height, rightInset, leftInset]);
+  }, [key, controls, size.width, size.height, rightInset, leftInset, farmExpanded]);
 
   useFrame((state, dt) => {
     const a = anim.current;
