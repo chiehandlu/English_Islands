@@ -9,4 +9,6 @@
 
 ## Cloudflare Pages（正式版）
 
-- 尚未設定。接上 GitHub repo 後：Framework preset = Next.js (Static HTML Export)，build command `npm run build`，output directory `out`。
+- GitHub repo：https://github.com/chiehandlu/English_Islands（`main` 分支，push 就自動部署）
+- 設定：Framework preset = Next.js (Static HTML Export)，build command `npm run build`，output directory `out`。
+- Node 版本由根目錄 `.node-version`（22）決定；Cloudflare 預設的 Node 18 跑不動 Next 16。
