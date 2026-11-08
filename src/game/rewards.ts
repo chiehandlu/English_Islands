@@ -1,9 +1,17 @@
 import { COMMON_ITEM, RARE_ITEM, dropFor, getPetKind } from "@/content/farm";
-import { ISLANDS, UNITS, islandsOfUnit } from "@/content/islands";
+import { ISLANDS, UNITS, coreIslandsOfUnit } from "@/content/islands";
 import { isLit, islandComplete, starsOf, unitComplete } from "./engine";
 import { addItems, grantDecor, grantPet, ownsPetKind } from "./farm";
 import { addDays } from "./review";
-import type { FarmState, GameState, Inventory, IslandKind, ItemId, QuestionType } from "./types";
+import type {
+  CoreIslandKind,
+  FarmState,
+  GameState,
+  Inventory,
+  IslandKind,
+  ItemId,
+  QuestionType,
+} from "./types";
 
 /**
  * 獎勵規則：一次挑戰給多少金幣與材料、每日上限、里程碑。純函式。
@@ -35,7 +43,8 @@ export const REWARD_CONFIG = {
 export interface QuestionOutcome {
   questionId: string;
   type: QuestionType;
-  islandKind: IslandKind;
+  /** 題目原本的島（複習島、錯題袋的題目也用原島），決定掉什麼材料 */
+  islandKind: CoreIslandKind;
   correct: boolean;
 }
 
@@ -236,7 +245,8 @@ export function claimMilestones(
         });
       }
       if (starsOf(s, b.id) === 3 && !has(`star3:${b.id}`)) {
-        const item = RARE_ITEM[island.kind];
+        // 複習島的三星送金幣，其他島送該島稀有材料
+        const item: ItemId = island.kind === "review" ? "coin" : RARE_ITEM[island.kind];
         s = give(
           { ...s, farm: claim(s.farm, `star3:${b.id}`) },
           { [item]: REWARD_CONFIG.firstThreeStars },
@@ -279,7 +289,7 @@ export function claimMilestones(
         });
       }
     }
-    const allStar = islandsOfUnit(unit).every((i) =>
+    const allStar = coreIslandsOfUnit(unit).every((i) =>
       i.buildings.every((b) => starsOf(s, b.id) === 3),
     );
     if (allStar && !has(`allstar:${unit.id}`)) {
@@ -316,8 +326,9 @@ export function claimMilestones(
   return { state: s, events };
 }
 
-/** 這棟會掉什麼（建築卡提示用）。 */
+/** 這棟會掉什麼（建築卡提示用）；複習島的建築照題目原本的島，回傳空陣列由介面另外說明。 */
 export function dropsForBuilding(kind: IslandKind, types: QuestionType[]): ItemId[] {
+  if (kind === "review") return [];
   const set = new Set<ItemId>();
   for (const t of types) set.add(dropFor(kind, t));
   const order: ItemId[] = [COMMON_ITEM[kind], RARE_ITEM[kind]];

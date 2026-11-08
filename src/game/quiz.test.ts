@@ -68,6 +68,17 @@ describe("quiz", () => {
     expect(a.items).toHaveLength(3);
   });
 
+  it("always includes priority questions and still shuffles", () => {
+    const questions = [choice, spell, order, yesno, match];
+    const s = createSession("b", questions, 7, 3, ["m1", "y1"]);
+    const ids = s.items.map((i) => i.question.id);
+    expect(ids).toHaveLength(3);
+    expect(ids).toContain("m1");
+    expect(ids).toContain("y1");
+    // 不存在的 id 會被忽略，超過 limit 的優先題會被截掉
+    expect(createSession("b", questions, 7, 2, ["nope", "m1", "y1", "s1"]).items).toHaveLength(2);
+  });
+
   it("tracks first-try results and finishes", () => {
     let s = createSession("b", [choice, spell], 1);
     s = submit(s, true);

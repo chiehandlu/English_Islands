@@ -1,4 +1,4 @@
-import type { DecorKind, IslandKind, ItemId, PetKind, QuestionType } from "@/game/types";
+import type { CoreIslandKind, DecorKind, ItemId, PetKind, QuestionType } from "@/game/types";
 
 /**
  * 農場的圖鑑與價格。全部是資料：改數字不用動程式。
@@ -7,7 +7,7 @@ import type { DecorKind, IslandKind, ItemId, PetKind, QuestionType } from "@/gam
 
 export const ITEM_META: Record<
   ItemId,
-  { name: string; emoji: string; source: string; island: IslandKind | null }
+  { name: string; emoji: string; source: string; island: CoreIslandKind | null }
 > = {
   coin: { name: "金幣", emoji: "🪙", source: "每次挑戰都有", island: null },
   grain: { name: "穀物", emoji: "🌾", source: "單字島：選擇、聽力、配對", island: "vocab" },
@@ -21,7 +21,7 @@ export const ITEM_META: Record<
 export const ITEM_IDS: ItemId[] = ["coin", "grain", "veg", "wood", "brick", "page", "key"];
 
 /** 每座島兩種材料：常見與稀有，稀有只有最難的題型掉。 */
-export function dropFor(island: IslandKind, type: QuestionType): ItemId {
+export function dropFor(island: CoreIslandKind, type: QuestionType): ItemId {
   switch (island) {
     case "vocab":
       return type === "spell" ? "veg" : "grain";
@@ -32,12 +32,12 @@ export function dropFor(island: IslandKind, type: QuestionType): ItemId {
   }
 }
 
-export const RARE_ITEM: Record<IslandKind, ItemId> = {
+export const RARE_ITEM: Record<CoreIslandKind, ItemId> = {
   vocab: "veg",
   grammar: "brick",
   reading: "key",
 };
-export const COMMON_ITEM: Record<IslandKind, ItemId> = {
+export const COMMON_ITEM: Record<CoreIslandKind, ItemId> = {
   vocab: "grain",
   grammar: "wood",
   reading: "page",

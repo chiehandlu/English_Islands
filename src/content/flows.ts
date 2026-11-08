@@ -11,6 +11,7 @@ export const FLOWS: Flow[] = UNITS.flatMap((unit) => {
   const vocab = byKind("vocab");
   const grammar = byKind("grammar");
   const reading = byKind("reading");
+  const review = byKind("review");
   const flows: Flow[] = [];
   if (vocab && grammar)
     flows.push({
@@ -32,6 +33,17 @@ export const FLOWS: Flow[] = UNITS.flatMap((unit) => {
       to: [reading],
       carry: "letter",
       walker: "teen",
+      bidirectional: false,
+    });
+  if (reading && review)
+    flows.push({
+      id: `${unit.id}-c`,
+      title: "弱點變強項",
+      description: `常答錯的題目，到複習島再練一次。`,
+      from: [reading],
+      to: [review],
+      carry: "medkit",
+      walker: "parent",
       bidirectional: false,
     });
   return flows;

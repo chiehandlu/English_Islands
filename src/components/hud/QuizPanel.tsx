@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { findBuilding, findQuestion } from "@/content/islands";
+import { findBuilding, findQuestion, originKind, unitOfIsland } from "@/content/islands";
 import { starsForRatio } from "@/game/engine";
-import { dueMistakes, toDateString } from "@/game/review";
+import { dueMistakes, frequentlyWrong, reviewSet, toDateString } from "@/game/review";
 import {
   type Answer,
   type QuizItem,
@@ -23,7 +23,6 @@ import type { Building, MatchQuestion, OrderQuestion, Question, SpellQuestion } 
 import { select } from "@/lib/selection";
 import { speakChinese, speakEnglish, stopSpeaking } from "@/lib/speech";
 import type { RunOutcome } from "@/game/rewards";
-import type { IslandKind } from "@/game/types";
 import { type QuizSummary, useGameStore } from "@/store/gameStore";
 import { type QuizTarget, useUiStore } from "@/store/uiStore";
 import { RewardList } from "./RewardList";
@@ -36,27 +35,67 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
   const game = useGameStore();
   const closeQuiz = useUiStore((s) => s.closeQuiz);
 
-  const { building, islandKind, questions, title } = useMemo(() => {
+  const { building, islandKind, questions, priority, troubleCount, title } = useMemo(() => {
+    const day = toDateString(new Date());
     if (target.kind === "building") {
       const found = findBuilding(target.buildingId);
+      if (!found) {
+        return {
+          building: undefined,
+          islandKind: null,
+          questions: [] as Question[],
+          priority: [] as string[],
+          troubleCount: 0,
+          title: "",
+        };
+      }
+      const { building: b, island } = found;
+      const title = `${b.emoji} ${b.name}`;
+      if (b.generated === "review" && b.reviewKind) {
+        // 複習島：以這個單元該種島的常錯題為主，不足再補其他題
+        const set = reviewSet(game, unitOfIsland(island), b.reviewKind, day);
+        return {
+          building: b,
+          islandKind: island.kind,
+          questions: set.questions,
+          priority: set.questions.slice(0, set.troubleCount).map((q) => q.id),
+          troubleCount: set.troubleCount,
+          title,
+        };
+      }
+      // 拼字練習：常拼錯的字一定會出現
+      const trouble =
+        b.generated === "dictation" ? frequentlyWrong(game, b.questions).slice(0, 5) : [];
       return {
-        building: found?.building,
-        islandKind: found?.island.kind ?? null,
-        questions: found?.building.questions ?? [],
-        title: found ? `${found.building.emoji} ${found.building.name}` : "",
+        building: b,
+        islandKind: island.kind,
+        questions: b.questions,
+        priority: trouble.map((q) => q.id),
+        troubleCount: trouble.length,
+        title,
       };
     }
-    const due = dueMistakes(game, toDateString(new Date()));
+    const due = dueMistakes(game, day);
     const qs = due
       .map((m) => findQuestion(m.questionId)?.question)
       .filter((q): q is Question => Boolean(q));
-    return { building: undefined, islandKind: null, questions: qs, title: "🎒 錯題袋" };
+    return {
+      building: undefined,
+      islandKind: null,
+      questions: qs,
+      priority: [] as string[],
+      troubleCount: 0,
+      title: "🎒 錯題袋",
+    };
     // 只在開啟時建立一次題目清單
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target]);
 
+  // 錯題袋與複習島答對，都會把題目從錯題袋拿掉
+  const reviewing = target.kind === "review" || building?.generated === "review";
+
   const [session, setSession] = useState<QuizSession>(() =>
-    createSession(building?.id ?? null, questions),
+    createSession(building?.id ?? null, questions, Date.now(), undefined, priority),
   );
   const [phase, setPhase] = useState<Phase>(questions.length === 0 ? "done" : "question");
   const [lastCorrect, setLastCorrect] = useState(false);
@@ -77,7 +116,7 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
     setPhase("feedback");
     const buildingId = building?.id ?? findQuestion(item.question.id)?.building.id ?? "";
     if (correct) {
-      if (target.kind === "review") game.markReviewed(item.question.id);
+      game.markRight(item.question.id, reviewing);
       speakEnglish(correctAnswerSpeech(item.question) ?? "");
     } else {
       game.markWrong(item.question.id, buildingId);
@@ -91,12 +130,11 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
     if (isFinished(session)) {
       // 結算：建築挑戰記錄星星；兩種都發獎勵、領里程碑
       if (session.items.length > 0) {
+        // 材料照題目原本的島算（複習島、錯題袋也一樣）
         const outcomes = session.items.map((it, i) => ({
           questionId: it.question.id,
           type: it.question.type,
-          islandKind: (islandKind ??
-            findQuestion(it.question.id)?.island.kind ??
-            "vocab") as IslandKind,
+          islandKind: originKind(it.question.id),
           correct: session.results[i] ?? false,
         }));
         const run: RunOutcome = {
@@ -114,7 +152,7 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
   };
 
   const retry = () => {
-    setSession(createSession(building?.id ?? null, questions));
+    setSession(createSession(building?.id ?? null, questions, Date.now(), undefined, priority));
     setSummaryResult(null);
     setPhase("question");
   };
@@ -156,6 +194,11 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
           )}
           {phase === "feedback" && answered && (
             <Feedback item={answered} correct={lastCorrect} onNext={next} />
+          )}
+          {phase === "question" && item && troubleCount > 0 && session.index === 0 && (
+            <p className="mt-4 text-center text-sm text-neutral-500">
+              這次有 {troubleCount} 題是之前常答錯的，再試一次！
+            </p>
           )}
           {phase === "done" && (
             <Done
@@ -259,14 +302,24 @@ function Prompt({ text, say, hint }: { text: string; say?: string; hint?: string
 }
 
 function SpellView({ q, onAnswer }: { q: SpellQuestion; onAnswer: (a: Answer) => void }) {
-  const tiles = useMemo(() => spellTiles(q.answer, rng(q.id.length * 131 + q.answer.length)), [q]);
+  const dictation = q.mode === "dictation";
+  const tiles = useMemo(
+    () => spellTiles(q.answer, rng(q.id.length * 131 + q.answer.length), dictation ? 4 : 3),
+    [q, dictation],
+  );
   const [used, setUsed] = useState<number[]>([]);
   const target = q.answer.replace(/\s+/g, "");
   const typed = used.map((i) => tiles[i]).join("");
+  const say = q.say ?? q.answer;
+
+  // 拼字練習：一開啟就把單字唸出來，小朋友聽了再拼
+  useEffect(() => {
+    if (dictation) speakEnglish(say);
+  }, [dictation, say]);
 
   return (
     <div className="space-y-5">
-      <Prompt text={q.prompt} say={q.say ?? q.answer} hint="拼出英文" />
+      <Prompt text={q.prompt} say={say} hint={dictation ? "聽聽看，然後拼出這個字" : "拼出英文"} />
       <div className="flex min-h-14 flex-wrap items-center gap-1 rounded-2xl bg-sand/40 p-3 text-2xl font-bold tracking-widest">
         {Array.from({ length: target.length }).map((_, i) => (
           <span
@@ -549,11 +602,13 @@ function Done({
       <p className="text-neutral-600">
         {review
           ? "答對的題目已經從錯題袋拿掉，答錯的過幾天再出現。"
-          : stars === 0
-            ? "再練習一次，答對一半以上房子就會亮燈。"
-            : stars === 3
-              ? `${building?.name ?? "這棟"}全亮了！`
-              : `${building?.name ?? "這棟"}亮燈了，全對可以拿三顆星。`}
+          : building?.generated === "review"
+            ? "常答錯的題目，多答對幾次就不會再排在前面了。"
+            : stars === 0
+              ? "再練習一次，答對一半以上房子就會亮燈。"
+              : stars === 3
+                ? `${building?.name ?? "這棟"}全亮了！`
+                : `${building?.name ?? "這棟"}亮燈了，全對可以拿三顆星。`}
       </p>
       {summary && <RewardList summary={summary} onFarm={onFarm} />}
       <div className="flex gap-3">

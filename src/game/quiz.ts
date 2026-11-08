@@ -78,14 +78,26 @@ export function makeItem(question: Question, random: () => number): QuizItem {
   }
 }
 
+/**
+ * 建立一次挑戰。priority 裡的題目（常錯的）一定會被選進來，其餘隨機補到 limit，最後整體洗牌。
+ */
 export function createSession(
   buildingId: string | null,
   questions: Question[],
   seed = Date.now(),
   limit = MAX_QUESTIONS,
+  priority: string[] = [],
 ): QuizSession {
   const random = rng(seed);
-  const picked = shuffle(questions, random).slice(0, limit);
+  const must = priority
+    .map((id) => questions.find((q) => q.id === id))
+    .filter((q): q is Question => Boolean(q))
+    .slice(0, limit);
+  const rest = shuffle(
+    questions.filter((q) => !must.includes(q)),
+    random,
+  ).slice(0, Math.max(0, limit - must.length));
+  const picked = shuffle([...must, ...rest], random);
   return {
     buildingId,
     items: picked.map((q) => makeItem(q, random)),

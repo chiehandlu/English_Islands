@@ -1,11 +1,11 @@
 "use client";
 
 import { CARRY_LABELS, WALKER_LABELS, flowIslands, flowsForIsland, getFlow } from "@/content/flows";
-import { findBuilding, getIsland, unitOfIsland } from "@/content/islands";
+import { findBuilding, getIsland, questionsOfKind, unitOfIsland } from "@/content/islands";
 import { ISLANDS } from "@/content/world";
 import { ITEM_META } from "@/content/farm";
 import { islandComplete, islandStatus, progressOf, starsOf } from "@/game/engine";
-import { mistakeCountByBuilding, toDateString } from "@/game/review";
+import { frequentlyWrong, mistakeCountByBuilding, reviewSet, toDateString } from "@/game/review";
 import { dropsForBuilding, runsLeftToday } from "@/game/rewards";
 import type { Building, Flow, Island } from "@/game/types";
 import { type Selection, select } from "@/lib/selection";
@@ -16,7 +16,12 @@ import { FLOW_COLORS } from "../scene/palette";
 import { FarmCard } from "./FarmCard";
 import { Stars } from "./Stars";
 
-export const KIND_LABELS = { vocab: "單字", grammar: "文法", reading: "閱讀" } as const;
+export const KIND_LABELS = {
+  vocab: "單字",
+  grammar: "文法",
+  reading: "閱讀",
+  review: "複習",
+} as const;
 
 /** 左側詳情卡：依選取顯示島／建築／協作線三種樣式。 */
 export function DetailCard({ selection }: { selection: Selection }) {
@@ -103,7 +108,13 @@ function IslandCard({ island }: { island: Island }) {
 
       {status === "locked" ? (
         <p className="mt-4 rounded-xl bg-neutral-100 p-3 text-sm text-neutral-600">
-          這座島還沒開放。把前一個單元的三座島都點亮，就會浮出來。
+          {island.kind === "review"
+            ? "把這個單元的單字島、文法島、閱讀島都點亮，複習島就會開放。"
+            : "這座島還沒開放。把前一個單元的三座島都點亮，就會浮出來。"}
+        </p>
+      ) : island.kind === "review" ? (
+        <p className="mt-4 text-sm text-neutral-600">
+          這裡專門出你之前常答錯的題目，答對幾次它們就不會再排在前面。材料照題目原本的島算。
         </p>
       ) : (
         <p className="mt-4 text-sm text-neutral-600">
@@ -145,11 +156,26 @@ function BuildingCard({ island, building }: { island: Island; building: Building
   const status = islandStatus(game, ISLANDS.indexOf(island));
   const progress = progressOf(game, building.id);
   const open = status !== "locked";
-  const drops = dropsForBuilding(
-    island.kind,
-    building.questions.map((q) => q.type),
-  );
-  const runsLeft = runsLeftToday(game.farm, building.id, toDateString(new Date()));
+  const today = toDateString(new Date());
+  const runsLeft = runsLeftToday(game.farm, building.id, today);
+
+  // 複習島：題目來自原本的島，數量與常錯題數每天不同
+  const review =
+    building.generated === "review" && building.reviewKind
+      ? reviewSet(game, unitOfIsland(island), building.reviewKind, today)
+      : null;
+  const questionCount = review ? review.questions.length : building.questions.length;
+  const dropKind = review ? building.reviewKind! : island.kind;
+  const dropTypes = (
+    review ? questionsOfKind(unitOfIsland(island), building.reviewKind!) : building.questions
+  ).map((q) => q.type);
+  const drops = dropsForBuilding(dropKind, dropTypes);
+  // 常錯題：複習島用 reviewSet 算；拼字練習顯示常拼錯的字
+  const trouble = review
+    ? review.questions.slice(0, review.troubleCount)
+    : building.generated === "dictation"
+      ? frequentlyWrong(game, building.questions).slice(0, 5)
+      : [];
 
   return (
     <article>
@@ -173,6 +199,31 @@ function BuildingCard({ island, building }: { island: Island; building: Building
         )}
       </div>
       <p className="mt-3 text-neutral-700">{building.intro}</p>
+
+      {(review || building.generated === "dictation") && (
+        <div className="mt-3 rounded-xl bg-sand/40 p-3 text-sm text-neutral-700">
+          {trouble.length === 0 ? (
+            <p>
+              {review
+                ? "目前沒有常答錯的題目，這次會從這種島隨機出題。"
+                : "還沒有常拼錯的字，先來聽聽看、拼拼看。"}
+            </p>
+          ) : (
+            <>
+              <p className="mono-label">
+                {review ? `常答錯的 ${trouble.length} 題會先出` : "常拼錯的字會先出"}
+              </p>
+              <ul className="mt-1 flex flex-wrap gap-1.5">
+                {trouble.map((q) => (
+                  <li key={q.id} className="rounded-lg bg-white px-2 py-1 text-xs">
+                    {(q.prompt ?? (q.type === "listen" ? `🔊 ${q.say}` : "")).slice(0, 18)}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
 
       {building.notes && building.notes.length > 0 && (
         <ul className="mt-3 list-disc space-y-1 rounded-xl bg-sand/40 p-3 pl-7 text-sm text-neutral-700">
@@ -244,11 +295,13 @@ function BuildingCard({ island, building }: { island: Island; building: Building
             className="btn-primary w-full text-lg"
             onClick={() => openQuiz({ kind: "building", buildingId: building.id })}
           >
-            {progress.stars === 0 ? "開始挑戰" : "再挑戰一次"}・{building.questions.length} 題
+            {progress.stars === 0 ? "開始挑戰" : "再挑戰一次"}・{questionCount} 題
           </button>
         ) : (
           <p className="rounded-xl bg-neutral-100 p-3 text-sm text-neutral-600">
-            這座島開放後才能挑戰。
+            {island.kind === "review"
+              ? "把這個單元的三座島都點亮，就可以來複習。"
+              : "這座島開放後才能挑戰。"}
           </p>
         )}
       </div>

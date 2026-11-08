@@ -1,4 +1,4 @@
-import { ISLANDS, UNITS, islandsOfUnit } from "@/content/islands";
+import { ISLANDS, UNITS, coreIslandsOfUnit } from "@/content/islands";
 import { createFarmState } from "./farm";
 import { toDateString } from "./review";
 import type { Building, BuildingProgress, GameState, Island, Stars, Unit } from "./types";
@@ -9,6 +9,7 @@ export function createInitialState(today = toDateString(new Date())): GameState 
     progress: {},
     mistakes: [],
     farm: createFarmState(today),
+    questionStats: {},
   };
 }
 
@@ -39,8 +40,9 @@ export function islandComplete(state: GameState, island: Pick<Island, "buildings
   return island.buildings.every((b) => isLit(state, b.id));
 }
 
+/** 單元完成看三座內容島；複習島不算，因為它要等單元完成才開放。 */
 export function unitComplete(state: GameState, unit: Unit): boolean {
-  return islandsOfUnit(unit).every((island) => islandComplete(state, island));
+  return coreIslandsOfUnit(unit).every((island) => islandComplete(state, island));
 }
 
 export type UnitStatus = "done" | "current" | "locked";
@@ -56,13 +58,17 @@ export function unitStatus(state: GameState, unitIndex: number): UnitStatus {
 
 export type IslandStatus = "visited" | "current" | "locked";
 
-/** 島的狀態沿用場景的三色：全亮＝visited、開放中＝current、未解鎖＝locked。 */
+/**
+ * 島的狀態沿用場景的三色：全亮＝visited、開放中＝current、未解鎖＝locked。
+ * 複習島要等同單元的三座島全亮才開放。
+ */
 export function islandStatus(state: GameState, islandIndex: number): IslandStatus {
   const island = ISLANDS[islandIndex];
   if (!island) return "locked";
   const unitIndex = UNITS.findIndex((u) => u.id === island.unitId);
   const status = unitStatus(state, unitIndex);
   if (status === "locked") return "locked";
+  if (island.kind === "review" && !unitComplete(state, UNITS[unitIndex])) return "locked";
   return islandComplete(state, island) ? "visited" : "current";
 }
 

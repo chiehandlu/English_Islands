@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ISLANDS, UNITS, islandsOfUnit } from "@/content/islands";
+import { ISLANDS, UNITS, coreIslandsOfUnit, reviewIslandOfUnit } from "@/content/islands";
 import {
   completionRatio,
   createInitialState,
@@ -13,7 +13,7 @@ import {
 import type { GameState } from "./types";
 
 function lightUnit(state: GameState, unitIndex: number): GameState {
-  for (const island of islandsOfUnit(UNITS[unitIndex])) {
+  for (const island of coreIslandsOfUnit(UNITS[unitIndex])) {
     for (const b of island.buildings) state = recordResult(state, b.id, 1);
   }
   return state;
@@ -54,11 +54,35 @@ describe("engine", () => {
     expect(islandStatus(s, 0)).toBe("visited");
   });
 
+  it("opens the review island only after the unit's three core islands are lit", () => {
+    const unit = UNITS[0];
+    const review = reviewIslandOfUnit(unit)!;
+    const reviewIndex = ISLANDS.indexOf(review);
+    let s = createInitialState();
+    expect(islandStatus(s, reviewIndex)).toBe("locked");
+    // 三座島亮了兩座還不行
+    const [a, b, c] = coreIslandsOfUnit(unit);
+    for (const island of [a, b]) {
+      for (const bld of island.buildings) s = recordResult(s, bld.id, 0.6);
+    }
+    expect(islandStatus(s, reviewIndex)).toBe("locked");
+    expect(unitStatus(s, 0)).toBe("current");
+    for (const bld of c.buildings) s = recordResult(s, bld.id, 0.6);
+    // 複習島不算進單元完成，所以單元已經 done、複習島同時開放
+    expect(unitStatus(s, 0)).toBe("done");
+    expect(islandStatus(s, reviewIndex)).toBe("current");
+    for (const bld of review.buildings) s = recordResult(s, bld.id, 1);
+    expect(islandStatus(s, reviewIndex)).toBe("visited");
+  });
+
   it("locks later units until the previous one is complete", () => {
     if (UNITS.length < 2) {
       // 只有一個單元時，至少確認完成後狀態為 done
-      const s = lightUnit(createInitialState(), 0);
+      let s = lightUnit(createInitialState(), 0);
       expect(unitStatus(s, 0)).toBe("done");
+      // 複習島的建築也算進天色用的完成度，全亮才到 1
+      expect(completionRatio(s)).toBeLessThan(1);
+      for (const b of reviewIslandOfUnit(UNITS[0])!.buildings) s = recordResult(s, b.id, 1);
       expect(completionRatio(s)).toBe(1);
       return;
     }

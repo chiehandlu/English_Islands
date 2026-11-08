@@ -16,7 +16,7 @@ import {
   sendOutside,
   setPetSlot,
 } from "@/game/farm";
-import { addMistake, resolveMistake, toDateString } from "@/game/review";
+import { addMistake, recordAnswer, resolveMistake, toDateString } from "@/game/review";
 import {
   type RewardEvent,
   type RewardResult,
@@ -33,7 +33,10 @@ export interface QuizSummary extends RewardResult {
 interface GameStore extends GameState {
   /** 結算一次挑戰：記星星、發獎勵、領里程碑；回傳給結算畫面顯示 */
   finishQuiz: (run: RunOutcome, ratio: number) => QuizSummary;
+  /** 答錯：進錯題袋、記一次錯 */
   markWrong: (questionId: string, buildingId: string) => void;
+  /** 答對：記一次對；review 為 true 時同時從錯題袋移除 */
+  markRight: (questionId: string, review: boolean) => void;
   markReviewed: (questionId: string) => void;
   setPlayer: (player: Partial<GameState["player"]>) => void;
   adopt: (kindId: string) => FarmResult;
@@ -52,6 +55,7 @@ const pickState = (s: GameState): GameState => ({
   progress: s.progress,
   mistakes: s.mistakes,
   farm: s.farm,
+  questionStats: s.questionStats,
 });
 
 const today = () => toDateString(new Date());
@@ -75,8 +79,22 @@ export const useGameStore = create<GameStore>()(
           set(milestones.state);
           return { ...rewarded.result, milestones: milestones.events };
         },
-        markWrong: (questionId, buildingId) =>
-          set(addMistake(pickState(get()), questionId, buildingId, today())),
+        markWrong: (questionId, buildingId) => {
+          const day = today();
+          set(
+            recordAnswer(
+              addMistake(pickState(get()), questionId, buildingId, day),
+              questionId,
+              false,
+              day,
+            ),
+          );
+        },
+        markRight: (questionId, review) => {
+          let state = recordAnswer(pickState(get()), questionId, true, today());
+          if (review) state = resolveMistake(state, questionId);
+          set(state);
+        },
         markReviewed: (questionId) => set(resolveMistake(pickState(get()), questionId)),
         setPlayer: (player) => set(setPlayer(pickState(get()), player)),
         adopt: (kindId) => apply(adoptPet(pickState(get()), kindId, today())),
@@ -92,15 +110,20 @@ export const useGameStore = create<GameStore>()(
     },
     {
       name: "english-island-save",
-      // v2：加入農場（inventory、pets、decor、每日計數）；v3：農場加 landExpanded
-      version: 3,
+      // v2：加入農場（inventory、pets、decor、每日計數）；v3：農場加 landExpanded；v4：questionStats
+      version: 4,
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => pickState(s),
       migrate: (persisted, version) => {
         if (version < 1) return createInitialState();
         const old = persisted as Partial<GameState>;
         const farm = { ...createFarmState(today()), ...(old.farm ?? {}) };
-        return { ...createInitialState(), ...old, farm } as GameState;
+        return {
+          ...createInitialState(),
+          ...old,
+          farm,
+          questionStats: old.questionStats ?? {},
+        } as GameState;
       },
     },
   ),

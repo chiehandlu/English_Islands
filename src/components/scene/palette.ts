@@ -7,6 +7,8 @@ export const SCENE_COLORS = {
   grass: "#8cc084",
   grassCurrent: "#a6d47f",
   grassLocked: "#b9c2b5",
+  grassReview: "#d6c48a",
+  grassReviewCurrent: "#e8d58f",
   bridge: "#c8a27a",
   accent: "#db6a41",
   wall: "#fbf6ec",

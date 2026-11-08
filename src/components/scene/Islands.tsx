@@ -13,7 +13,7 @@ import {
 } from "@/content/world";
 import { flowIslands, getFlow } from "@/content/flows";
 import { islandStatus, starsOf, type IslandStatus } from "@/game/engine";
-import type { GameState, IslandId, Stars } from "@/game/types";
+import type { GameState, IslandId, IslandKind, Stars } from "@/game/types";
 import { ISLAND_TILES, TILE_SIZE, tileOffset } from "@/scene/layout";
 import { type Selection, select } from "@/lib/selection";
 import { useUiStore } from "@/store/uiStore";
@@ -37,9 +37,12 @@ function selectedIslandId(selection: Selection): IslandId | undefined {
   }
 }
 
-function grassColor(status: IslandStatus) {
-  if (status === "current") return SCENE_COLORS.grassCurrent;
-  return status === "locked" ? SCENE_COLORS.grassLocked : SCENE_COLORS.grass;
+function grassColor(status: IslandStatus, kind: IslandKind) {
+  if (status === "locked") return SCENE_COLORS.grassLocked;
+  // 複習島用麥色，一眼看出跟三座課程島不一樣
+  if (kind === "review")
+    return status === "current" ? SCENE_COLORS.grassReviewCurrent : SCENE_COLORS.grassReview;
+  return status === "current" ? SCENE_COLORS.grassCurrent : SCENE_COLORS.grass;
 }
 
 export function Islands({ game, selection, showLabels, labelLayer }: Props) {
@@ -79,7 +82,7 @@ export function Islands({ game, selection, showLabels, labelLayer }: Props) {
                 >
                   <cylinderGeometry args={[TILE_SIZE * 0.97, TILE_SIZE * 0.97, TILE_HEIGHT, 6]} />
                   <meshStandardMaterial
-                    color={grassColor(status)}
+                    color={grassColor(status, island.kind)}
                     transparent
                     opacity={dimmed ? 0.35 : 1}
                   />
@@ -98,6 +101,7 @@ export function Islands({ game, selection, showLabels, labelLayer }: Props) {
               >
                 <span className="name-tag-number">{island.number}</span>
                 {island.name}
+                {status === "locked" && island.kind === "review" && <span aria-hidden> 🔒</span>}
               </button>
             </Html>
           </group>

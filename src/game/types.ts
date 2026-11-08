@@ -6,7 +6,9 @@
 
 // ---------- 內容 ----------
 
-export type IslandKind = "vocab" | "grammar" | "reading";
+/** 課本內容的三種島；review 是每單元自動多出來的複習島 */
+export type CoreIslandKind = "vocab" | "grammar" | "reading";
+export type IslandKind = CoreIslandKind | "review";
 
 /** 單字卡：建築卡裡可以點來聽的字或句子。 */
 export interface Card {
@@ -42,12 +44,13 @@ export interface ListenQuestion extends QuestionBase {
   answer: number;
 }
 
-/** 拼字題：看中文提示（可聽發音）用字母磚拼出英文 */
+/** 拼字題：看中文提示（可聽發音）用字母磚拼出英文；dictation 模式一開始就唸，重點在聽 */
 export interface SpellQuestion extends QuestionBase {
   type: "spell";
   prompt: string;
   say?: string;
   answer: string;
+  mode?: "dictation";
 }
 
 /** 配對題：左右兩欄連線 */
@@ -91,6 +94,10 @@ export interface Building {
   /** 閱讀島的短文，一行一句，每句都可以點來聽 */
   passage?: string[];
   questions: Question[];
+  /** 程式自動產生的建築（拼字練習、複習島），不是內容檔寫的 */
+  generated?: "dictation" | "review";
+  /** 複習島的建築：複習哪一種島的題目 */
+  reviewKind?: CoreIslandKind;
 }
 
 /** 島＝單元裡的一個區（單字／文法／閱讀）。 */
@@ -238,9 +245,18 @@ export interface FarmState {
   runsHistory: Record<string, number>;
 }
 
+/** 每一題累計答對／答錯幾次，複習島用來挑「常錯的」 */
+export interface QuestionStat {
+  wrong: number;
+  right: number;
+  /** 最後一次答錯的日期 */
+  lastWrong: string | null;
+}
+
 export interface GameState {
   player: { name: string; avatar: string };
   progress: Record<string, BuildingProgress>;
   mistakes: Mistake[];
   farm: FarmState;
+  questionStats: Record<string, QuestionStat>;
 }

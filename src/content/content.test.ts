@@ -1,10 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { FLOWS } from "./flows";
-import { ISLANDS, UNITS } from "./islands";
+import {
+  CORE_KINDS,
+  ISLANDS,
+  UNITS,
+  coreIslandsOfUnit,
+  originKind,
+  questionsOfKind,
+  reviewIslandOfUnit,
+} from "./islands";
 
-/** 內容規則（見 CLAUDE.md 與 docs/content-format.md）的自動檢查。 */
+/**
+ * 內容規則（見 CLAUDE.md 與 docs/content-format.md）的自動檢查。
+ * 「人寫的」規則查 UNITS（uNN.json）；拼字練習與複習島是程式產生的，另外檢查。
+ */
 describe("content", () => {
   const buildings = ISLANDS.flatMap((i) => i.buildings);
+  const authored = buildings.filter((b) => !b.generated);
   const questions = buildings.flatMap((b) => b.questions);
 
   it("has unique ids across units, islands, buildings and questions", () => {
@@ -28,10 +40,19 @@ describe("content", () => {
     expect(new Set(coords).size).toBe(coords.length);
   });
 
-  it("gives every unit three islands of distinct kinds", () => {
+  it("gives every unit three authored islands of distinct kinds plus a derived review island", () => {
     for (const u of UNITS) {
       expect(u.islands, u.id).toHaveLength(3);
       expect(new Set(u.islands.map((i) => i.kind)).size).toBe(3);
+      expect(
+        coreIslandsOfUnit(u)
+          .map((i) => i.kind)
+          .sort(),
+      ).toEqual([...CORE_KINDS].sort());
+      const review = reviewIslandOfUnit(u);
+      expect(review, u.id).toBeDefined();
+      expect(review!.buildings.map((b) => b.reviewKind).sort()).toEqual([...CORE_KINDS].sort());
+      for (const b of review!.buildings) expect(b.generated).toBe("review");
     }
   });
 
@@ -40,14 +61,48 @@ describe("content", () => {
       expect(island.buildings.length, island.id).toBeGreaterThanOrEqual(1);
       expect(island.buildings.length, island.id).toBeLessThanOrEqual(5);
     }
+    // 單字島最多 4 棟人寫的，第 5 棟留給拼字練習
+    for (const u of UNITS) {
+      const vocab = u.islands.find((i) => i.kind === "vocab")!;
+      expect(vocab.buildings.length, u.id).toBeLessThanOrEqual(4);
+    }
   });
 
-  it("gives every building 5–12 questions and a non-empty intro", () => {
-    for (const b of buildings) {
+  it("adds a dictation building to every vocab island with the unit's words", () => {
+    for (const u of UNITS) {
+      const vocab = coreIslandsOfUnit(u).find((i) => i.kind === "vocab")!;
+      const spell = vocab.buildings.find((b) => b.generated === "dictation");
+      expect(spell, u.id).toBeDefined();
+      expect(spell!.questions.length).toBeGreaterThanOrEqual(5);
+      for (const q of spell!.questions) {
+        expect(q.type).toBe("spell");
+        if (q.type === "spell") {
+          expect(q.mode).toBe("dictation");
+          expect(q.say, q.id).toBeTruthy();
+          expect(q.answer).toMatch(/^[a-z' ]+$/);
+        }
+      }
+    }
+  });
+
+  it("gives every authored building 5–12 questions and a non-empty intro", () => {
+    for (const b of authored) {
       expect(b.questions.length, b.id).toBeGreaterThanOrEqual(5);
       expect(b.questions.length, b.id).toBeLessThanOrEqual(12);
+    }
+    for (const b of buildings) {
       expect(b.intro.length, b.id).toBeGreaterThan(0);
       expect(b.emoji.length, b.id).toBeGreaterThan(0);
+    }
+  });
+
+  it("knows which core island every question came from", () => {
+    for (const u of UNITS) {
+      for (const kind of CORE_KINDS) {
+        const pool = questionsOfKind(u, kind);
+        expect(pool.length, `${u.id} ${kind}`).toBeGreaterThan(0);
+        for (const q of pool) expect(originKind(q.id), q.id).toBe(kind);
+      }
     }
   });
 
@@ -96,8 +151,8 @@ describe("content", () => {
     }
   });
 
-  it("mixes question types inside a building", () => {
-    for (const b of buildings) {
+  it("mixes question types inside an authored building", () => {
+    for (const b of authored) {
       const types = new Set(b.questions.map((q) => q.type));
       expect(types.size, b.id).toBeGreaterThanOrEqual(2);
     }

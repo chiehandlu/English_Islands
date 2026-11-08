@@ -4,13 +4,14 @@ import { Stars } from "@/components/hud/Stars";
 import { ItemChips } from "@/components/hud/RewardList";
 import { PET_KINDS, getPetKind } from "@/content/farm";
 import { STAGE_LABELS, petStage } from "@/game/farm";
-import { UNITS, findQuestion, islandsOfUnit } from "@/content/islands";
+import { ALL_BUILDINGS, UNITS, findQuestion, islandsOfUnit } from "@/content/islands";
 import { maxTotalStars, progressOf, totalStars, unitStatus } from "@/game/engine";
+import { frequentlyWrong, statOf } from "@/game/review";
 import { useState } from "react";
 import { useGameStore, useHasHydrated } from "@/store/gameStore";
 import { useUiStore } from "@/store/uiStore";
 
-const KIND = { vocab: "單字", grammar: "文法", reading: "閱讀" } as const;
+const KIND = { vocab: "單字", grammar: "文法", reading: "閱讀", review: "複習" } as const;
 
 /** 家長頁：每棟的星數與挑戰次數、錯題袋內容、重設。 */
 export function ReportView() {
@@ -28,6 +29,11 @@ export function ReportView() {
   const weakTags = Object.entries(tagCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
+  // 常錯題：看累計的答對／答錯次數，和錯題袋（只看下次複習日）不同
+  const trouble = frequentlyWrong(
+    game,
+    ALL_BUILDINGS.filter((b) => b.generated !== "review").flatMap((b) => b.questions),
+  ).slice(0, 12);
 
   return (
     <main className="mx-auto w-full max-w-2xl space-y-8 px-4 py-8">
@@ -132,6 +138,34 @@ export function ReportView() {
           ))}
         </section>
       ))}
+
+      {trouble.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="text-xl font-bold">常錯題</h2>
+          <p className="text-sm text-neutral-600">
+            累計答錯比答對多的題目，複習島和拼字練習會優先出這些；答對幾次就會從名單消失。
+          </p>
+          <ul className="glass-card divide-y divide-neutral-200/70 p-4">
+            {trouble.map((q) => {
+              const found = findQuestion(q.id);
+              const stat = statOf(game, q.id);
+              const text = "prompt" in q && q.prompt ? q.prompt : "say" in q ? q.say : q.id;
+              return (
+                <li key={q.id} className="flex items-start gap-3 py-2 text-sm">
+                  <span className="flex-1">
+                    <span className="block">{text}</span>
+                    <span className="text-xs text-neutral-500">
+                      {found ? `${found.building.emoji} ${found.building.name}・` : ""}錯{" "}
+                      {stat.wrong} 次・對 {stat.right} 次
+                      {stat.lastWrong ? `・最近 ${stat.lastWrong}` : ""}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       {game.mistakes.length > 0 && (
         <section className="space-y-3">
