@@ -12,7 +12,7 @@ import {
   TREE_PLACEMENTS,
 } from "@/content/world";
 import { flowIslands, getFlow } from "@/content/flows";
-import { islandStatus, starsOf, type IslandStatus } from "@/game/engine";
+import { buildingAccess, islandStatus, starsOf, type IslandStatus } from "@/game/engine";
 import type { GameState, IslandId, IslandKind, Stars } from "@/game/types";
 import { ISLAND_TILES, TILE_SIZE, tileOffset } from "@/scene/layout";
 import { type Selection, select } from "@/lib/selection";
@@ -124,8 +124,9 @@ export function Islands({ game, selection, showLabels, labelLayer }: Props) {
         const island = ISLANDS[islandIndex];
         const building = island.buildings.find((b) => b.id === placement.buildingId)!;
         const status = islandStatus(game, islandIndex);
+        const access = buildingAccess(game, building.id);
         const stars = starsOf(game, building.id);
-        const isTask = status === "current" && stars === 0;
+        const isTask = access === "open" && status === "current" && stars === 0;
         const showLabel =
           showLabels && (focusIsland === placement.islandId || selection?.id === building.id);
         return (
@@ -133,7 +134,7 @@ export function Islands({ game, selection, showLabels, labelLayer }: Props) {
             key={building.id}
             position={placement.position}
             roof={ROOF_COLORS[i % ROOF_COLORS.length]}
-            locked={status === "locked"}
+            locked={access !== "open"}
             stars={stars}
             dimmed={litIslands !== undefined && !litIslands.includes(placement.islandId)}
             isTask={isTask}

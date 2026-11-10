@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { ISLANDS, UNITS, coreIslandsOfUnit, reviewIslandOfUnit } from "@/content/islands";
+import { dictationPriority } from "./review";
 import {
+  buildingAccess,
   completionRatio,
   createInitialState,
   islandComplete,
   islandStatus,
   recordResult,
+  spellingBuildingOf,
+  spellingPassed,
+  spellingProgress,
   starsForRatio,
   starsOf,
   unitStatus,
@@ -91,5 +96,57 @@ describe("engine", () => {
     const s1 = lightUnit(s0, 0);
     expect(unitStatus(s1, 0)).toBe("done");
     expect(unitStatus(s1, 1)).toBe("current");
+  });
+
+  describe("spelling gate", () => {
+    const unit = UNITS[0];
+    const spell = spellingBuildingOf(unit.id)!;
+    const spellAll = (state: GameState, ids = spell.questions.map((q) => q.id)): GameState => ({
+      ...state,
+      questionStats: Object.fromEntries(
+        ids.map((id) => [id, { wrong: 0, right: 1, lastWrong: null }]),
+      ),
+    });
+
+    it("opens only the spelling practice until every word was spelled once", () => {
+      const s = createInitialState();
+      expect(buildingAccess(s, spell.id)).toBe("open");
+      expect(buildingAccess(s, `${unit.id}-v1`)).toBe("needs_spelling");
+      expect(buildingAccess(s, `${unit.id}-g1`)).toBe("needs_spelling");
+      expect(spellingProgress(s, unit.id)).toEqual({ done: 0, total: spell.questions.length });
+
+      const almost = spellAll(
+        s,
+        spell.questions.slice(1).map((q) => q.id),
+      );
+      expect(spellingPassed(almost, unit.id)).toBe(false);
+      expect(buildingAccess(almost, `${unit.id}-v1`)).toBe("needs_spelling");
+
+      const done = spellAll(s);
+      expect(spellingPassed(done, unit.id)).toBe(true);
+      expect(buildingAccess(done, `${unit.id}-v1`)).toBe("open");
+      expect(buildingAccess(done, `${unit.id}-r1`)).toBe("open");
+    });
+
+    it("keeps already lit buildings playable and the next unit locked by island", () => {
+      const s = recordResult(createInitialState(), `${unit.id}-g1`, 1);
+      expect(buildingAccess(s, `${unit.id}-g1`)).toBe("open");
+      expect(buildingAccess(s, `${unit.id}-g2`)).toBe("needs_spelling");
+      const next = UNITS[1];
+      if (next) expect(buildingAccess(s, `${next.id}-v1`)).toBe("island_locked");
+    });
+
+    it("puts never-spelled words first until the practice is passed", () => {
+      const first = spell.questions[0];
+      const s: GameState = {
+        ...spellAll(
+          createInitialState(),
+          spell.questions.slice(1).map((q) => q.id),
+        ),
+      };
+      expect(dictationPriority(s, spell.questions).map((q) => q.id)).toEqual([first.id]);
+      const passed = spellAll(createInitialState());
+      expect(dictationPriority(passed, spell.questions)).toEqual([]);
+    });
   });
 });

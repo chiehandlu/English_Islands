@@ -1,6 +1,6 @@
 # EnglishIsland｜英文島
 
-給國小四年級小朋友的英文練習遊戲（Jay 家私人使用，iPad Safari 為主）。畫面是一座可探索的 3D 等角群島：**一個課本單元＝三座相鄰的小島**（單字島、文法島、閱讀島）加一座**複習島**，島上的建築＝一個題組，答對題目建築就亮燈拿星（0–3 顆）；三座課程島全亮，下一個單元才開放、本單元的複習島也才開放。單字島的第 5 棟是自動產生的「拼字練習」（聽英文、拼出來）。答錯的題目進「錯題袋」，隔天再出；每題累計的對錯次數決定「常錯題」，複習島和拼字練習會優先出這些。每次挑戰賺金幣和材料，到**農場島**換寵物、餵食、蓋裝飾。
+給國小四年級小朋友的英文練習遊戲（Jay 家私人使用，iPad Safari 為主）。畫面是一座可探索的 3D 等角群島：**一個課本單元＝三座相鄰的小島**（單字島、文法島、閱讀島）加一座**複習島**，島上的建築＝一個題組，答對題目建築就亮燈拿星（0–3 顆）；三座課程島全亮，下一個單元才開放、本單元的複習島也才開放。單字島的第 5 棟是自動產生的「拼字練習」（聽英文、拼出來）；**每個單元都要先把拼字練習的每個字拼對過一次，其他房子才開放**。答錯的題目進「錯題袋」，隔天再出；每題累計的對錯次數決定「常錯題」，複習島和拼字練習會優先出這些。每次挑戰賺金幣和材料，到**農場島**換寵物、餵食、蓋裝飾。
 
 **正式網址：https://english-islands.pages.dev**（Cloudflare Pages，push `main` 自動部署）
 **GitHub：https://github.com/chiehandlu/English_Islands**
@@ -84,7 +84,7 @@ docs/
 
 1. **規則與畫面分離**：星等、解鎖、判題、錯題排程、獎勵計算寫在 `src/game/`；座標換算、小人移動、燈光計算、農場格子寫在 `src/scene/`。兩者都必須是無副作用的純函式並有測試。元件和 store 只呼叫它們，不自行計算。
 2. **內容即資料**：新增單元只加 `src/content/units/uNN.json` 和 `index.ts` 一行，不改引擎與場景元件。島的位置由單元順序推導（`islands.ts` 的 `CLUSTER_OFFSETS` / `CLUSTER_STEP`），內容檔不寫座標。
-3. **一單元三島＋複習島**：內容檔的 `kind` 固定 `vocab` / `grammar` / `reading` 各一；每島人寫的 1–4 棟（文法島、閱讀島兩邊有橋只剩 4 格；單字島第 5 格給拼字練習）。`content/islands.ts` 推導時自動加上：單字島第 5 棟 `uNN-spell`（`generated: "dictation"`，題目來自全單元 `cards`，`mode: "dictation"`）與第四座島 `uNN-review`（`kind: "review"`，三棟 `generated: "review"` 各對應一種 `reviewKind`，`questions` 為空，出題時由 `review.ts` 的 `reviewSet` 動態組）。單元完成（`unitComplete`）與全三星只看三座課程島（`coreIslandsOfUnit`）；複習島在單元完成前 `islandStatus` 為 `locked`。材料掉落照題目原本的島（`originKind`）。`content.test.ts` 會檢查。
+3. **一單元三島＋複習島**：內容檔的 `kind` 固定 `vocab` / `grammar` / `reading` 各一；每島人寫的 1–4 棟（文法島、閱讀島兩邊有橋只剩 4 格；單字島第 5 格給拼字練習）。`content/islands.ts` 推導時自動加上：單字島第 5 棟 `uNN-spell`（`generated: "dictation"`，題目來自全單元 `cards`，`mode: "dictation"`）與第四座島 `uNN-review`（`kind: "review"`，三棟 `generated: "review"` 各對應一種 `reviewKind`，`questions` 為空，出題時由 `review.ts` 的 `reviewSet` 動態組）。**拼字先過關**：`engine.ts` 的 `buildingAccess` 決定一棟能不能挑戰——島要開放，而且同單元拼字練習的每個字都要在 `questionStats` 裡 `right ≥ 1`（`spellingPassed`）；拼字練習本身與已亮燈的房子不受限。還沒過關時拼字練習優先出沒拼對過的字（`review.ts` 的 `dictationPriority`）。單元完成（`unitComplete`）與全三星只看三座課程島（`coreIslandsOfUnit`）；複習島在單元完成前 `islandStatus` 為 `locked`。材料掉落照題目原本的島（`originKind`）。`content.test.ts` 會檢查。
 4. **進度只存五樣**：`player`、`progress`（每棟 `stars`/`best`/`attempts`）、`mistakes`（錯題與下次複習日）、`questionStats`（每題累計 `wrong`/`right`/`lastWrong`）、`farm`（背包、寵物、裝飾、每日計數、已領里程碑）。島與單元的狀態一律由此推導。星星只升不降，農場的東西只進不出（拆裝飾退一半材料是唯一例外）。「常錯題」＝`troubleScore = wrong×2 − right > 0`，答對會慢慢抵銷。
 5. **星等**：答對率 ≥ 0.9 三顆、≥ 0.7 兩顆、≥ 0.5 一顆；一顆星以上＝亮燈。改門檻只改 `engine.ts` 的 `starsForRatio` 與測試。
    **獎勵**：金幣 1/2/3、首次全對 +2、每棟每天前 5 次全額；材料每答對一題掉一個，依「島 × 題型」查 `content/farm.ts` 的 `dropFor`。數字都在 `rewards.ts` 的 `REWARD_CONFIG` 與 `farm.ts` 的 `FARM_CONFIG`。結算順序固定：`recordResult` → `applyRunRewards` → `claimMilestones`（`gameStore.finishQuiz`）。
@@ -138,8 +138,8 @@ docs/
 
 ## 驗證方式
 
-- 單元測試：`npm test`（74 個測試：引擎、出題、錯題／常錯、獎勵、農場（含主題、植物、天氣）、場景幾何與天氣、內容規則）。
-- 端對端：`scripts/e2e/review.py`（Playwright + headless Chrome，`BASE=<靜態主機網址> python3 scripts/e2e/review.py`）。會走完「拼字練習故意錯 3 題 → 點亮三座島 → 複習島開放 → 文法複習三星」，印出 localStorage 裡的 `questionStats`、`mistakes`、背包。headless 用 swiftshader 很慢，所以腳本用 `dispatch_event("click")`、藏起 canvas；同 prompt 的題目要用畫面上的選項／字卡去分辨。
+- 單元測試：`npm test`（77 個測試：引擎、出題、錯題／常錯、獎勵、農場（含主題、植物、天氣）、場景幾何與天氣、內容規則）。
+- 端對端：`scripts/e2e/review.py`（Playwright + headless Chrome，`BASE=<靜態主機網址> python3 scripts/e2e/review.py`）。會走完「拼字練習故意錯 3 題 → 其他房子鎖著 → 拼字練習練到每個字都拼對 → 點亮三座島 → 複習島開放 → 文法複習」，印出 localStorage 裡的 `questionStats`、`mistakes`、背包。headless 用 swiftshader 很慢，所以腳本用 `dispatch_event("click")`、藏起 canvas，每按一塊字母磚要等 60ms；環境沒有 Python Playwright 就 `pip install playwright`，`CHROME=/opt/pw-browsers/chromium`；同 prompt 的題目要用畫面上的選項／字卡去分辨。
 - 真機：iPad Safari 開正式網址；語音要實際點一下才會響。
 
 ## 進度
@@ -153,6 +153,7 @@ docs/
 - [x] 部署到 Cloudflare Pages，push 自動更新
 - [x] Unit 4（Getting Together）
 - [x] 農場植物（種子施肥長大）、每課一組主題（萬聖節、聖誕節）、天氣（雨、雪、打雷，整個群島）
+- [x] 每個單元先過拼字練習（每個字拼對一次）才開放其他房子
 
 ## Backlog 與發想（還沒做，照 Jay 提過的順序）
 
@@ -173,6 +174,7 @@ docs/
 - Cloudflare Pages 預設 Node 18 → Next 16 會炸，`.node-version`＋`NODE_VERSION` 都設 22。新專案的 `*.pages.dev` 剛建好前一分鐘會 522，等一下再開。
 - Prettier 會重排程式碼，用腳本做字串取代前先看實際文字。
 - GameState 加欄位忘了進 `pickState`／`migrate`，存檔就會缺欄位而當掉。
+- 拼字的字母磚沒有空白鍵：判題要忽略空白（`isCorrect`），不然 post office 這類片語永遠拼不對。
 
 ## 工作慣例
 

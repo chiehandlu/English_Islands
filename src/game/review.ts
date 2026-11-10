@@ -145,3 +145,16 @@ function shuffleWith<T>(items: T[], random: () => number): T[] {
   }
   return out;
 }
+
+/**
+ * 拼字練習這次一定要出的字：還沒過關時先出「還沒拼對過的字」，再加常拼錯的；
+ * 過關後只優先常拼錯的。
+ */
+export function dictationPriority(state: GameState, questions: Question[], limit = 5): Question[] {
+  const trouble = frequentlyWrong(state, questions).slice(0, limit);
+  const unspelled = questions.filter((q) => (state.questionStats[q.id]?.right ?? 0) < 1);
+  if (unspelled.length === 0) return trouble;
+  // 還沒拼對過、又常拼錯的排最前面
+  const first = trouble.filter((q) => unspelled.includes(q));
+  return [...first, ...unspelled.filter((q) => !first.includes(q))];
+}

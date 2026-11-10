@@ -3,7 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { findBuilding, findQuestion, originKind, unitOfIsland } from "@/content/islands";
 import { starsForRatio } from "@/game/engine";
-import { dueMistakes, frequentlyWrong, reviewSet, toDateString } from "@/game/review";
+import {
+  dictationPriority,
+  dueMistakes,
+  frequentlyWrong,
+  reviewSet,
+  toDateString,
+} from "@/game/review";
 import {
   type Answer,
   type QuizItem,
@@ -63,14 +69,14 @@ export function QuizPanel({ target }: { target: NonNullable<QuizTarget> }) {
           title,
         };
       }
-      // 拼字練習：常拼錯的字一定會出現
-      const trouble =
-        b.generated === "dictation" ? frequentlyWrong(game, b.questions).slice(0, 5) : [];
+      // 拼字練習：還沒拼對過的字、常拼錯的字一定會出現
+      const dictation = b.generated === "dictation";
+      const trouble = dictation ? frequentlyWrong(game, b.questions).slice(0, 5) : [];
       return {
         building: b,
         islandKind: island.kind,
         questions: b.questions,
-        priority: trouble.map((q) => q.id),
+        priority: dictation ? dictationPriority(game, b.questions).map((q) => q.id) : [],
         troubleCount: trouble.length,
         title,
       };
@@ -309,6 +315,15 @@ function SpellView({ q, onAnswer }: { q: SpellQuestion; onAnswer: (a: Answer) =>
   );
   const [used, setUsed] = useState<number[]>([]);
   const target = q.answer.replace(/\s+/g, "");
+  // 片語（post office）在兩個字中間留一點空隙，提示是兩個字
+  const gapsAfter = new Set<number>();
+  q.answer
+    .trim()
+    .split(/\s+/)
+    .reduce((n, word) => {
+      gapsAfter.add(n + word.length - 1);
+      return n + word.length;
+    }, 0);
   const typed = used.map((i) => tiles[i]).join("");
   const say = q.say ?? q.answer;
 
@@ -324,7 +339,8 @@ function SpellView({ q, onAnswer }: { q: SpellQuestion; onAnswer: (a: Answer) =>
         {Array.from({ length: target.length }).map((_, i) => (
           <span
             key={i}
-            className="grid h-11 w-9 place-items-center rounded-lg border-b-4 border-neutral-300 bg-white"
+            data-gap={gapsAfter.has(i) && i < target.length - 1}
+            className="grid h-11 w-9 place-items-center rounded-lg border-b-4 border-neutral-300 bg-white data-[gap=true]:mr-4"
           >
             {typed[i] ?? ""}
           </span>

@@ -115,7 +115,11 @@ export function isCorrect(question: Question, answer: Answer): boolean {
     case "listen":
       return typeof answer === "string" && answer === question.options[question.answer];
     case "spell":
-      return typeof answer === "string" && normalize(answer) === normalize(question.answer);
+      // 字母磚沒有空白鍵，所以 post office 拼成 postoffice 也算對
+      return (
+        typeof answer === "string" &&
+        normalize(answer).replace(/ /g, "") === normalize(question.answer).replace(/ /g, "")
+      );
     case "order":
       return typeof answer === "string" && normalize(answer) === normalize(question.answer);
     case "yesno":

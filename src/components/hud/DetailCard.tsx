@@ -4,7 +4,16 @@ import { CARRY_LABELS, WALKER_LABELS, flowIslands, flowsForIsland, getFlow } fro
 import { findBuilding, getIsland, questionsOfKind, unitOfIsland } from "@/content/islands";
 import { ISLANDS } from "@/content/world";
 import { ITEM_META } from "@/content/farm";
-import { islandComplete, islandStatus, progressOf, starsOf } from "@/game/engine";
+import {
+  buildingAccess,
+  islandComplete,
+  islandStatus,
+  progressOf,
+  spellingBuildingOf,
+  spellingProgress,
+  starsOf,
+  unspelledWords,
+} from "@/game/engine";
 import { frequentlyWrong, mistakeCountByBuilding, reviewSet, toDateString } from "@/game/review";
 import { dropsForBuilding, runsLeftToday } from "@/game/rewards";
 import type { Building, Flow, Island } from "@/game/types";
@@ -121,6 +130,7 @@ function IslandCard({ island }: { island: Island }) {
           點一棟房子開始挑戰，答對一半以上房子就會亮燈。
         </p>
       )}
+      {status !== "locked" && <SpellingGate unitId={island.unitId} />}
 
       <ul className="mt-3 divide-y divide-neutral-200/70">
         {island.buildings.map((b) => (
@@ -139,6 +149,11 @@ function IslandCard({ island }: { island: Island }) {
                   <span className="text-xs text-neutral-500">錯題袋 {mistakes[b.id]} 題</span>
                 ) : null}
               </span>
+              {buildingAccess(game, b.id) === "needs_spelling" && (
+                <span className="text-sm" aria-label="先過拼字練習">
+                  🔒
+                </span>
+              )}
               <Stars value={starsOf(game, b.id)} />
               <span aria-hidden>›</span>
             </button>
@@ -153,9 +168,9 @@ function IslandCard({ island }: { island: Island }) {
 function BuildingCard({ island, building }: { island: Island; building: Building }) {
   const game = useGameStore();
   const openQuiz = useUiStore((s) => s.openQuiz);
-  const status = islandStatus(game, ISLANDS.indexOf(island));
   const progress = progressOf(game, building.id);
-  const open = status !== "locked";
+  const access = buildingAccess(game, building.id);
+  const open = access === "open";
   const today = toDateString(new Date());
   const runsLeft = runsLeftToday(game.farm, building.id, today);
 
@@ -199,6 +214,8 @@ function BuildingCard({ island, building }: { island: Island; building: Building
         )}
       </div>
       <p className="mt-3 text-neutral-700">{building.intro}</p>
+
+      {building.generated === "dictation" && <SpellingGate unitId={island.unitId} self />}
 
       {(review || building.generated === "dictation") && (
         <div className="mt-3 rounded-xl bg-sand/40 p-3 text-sm text-neutral-700">
@@ -297,6 +314,8 @@ function BuildingCard({ island, building }: { island: Island; building: Building
           >
             {progress.stars === 0 ? "開始挑戰" : "再挑戰一次"}・{questionCount} 題
           </button>
+        ) : access === "needs_spelling" ? (
+          <SpellingGate unitId={island.unitId} />
         ) : (
           <p className="rounded-xl bg-neutral-100 p-3 text-sm text-neutral-600">
             {island.kind === "review"
@@ -306,6 +325,54 @@ function BuildingCard({ island, building }: { island: Island; building: Building
         )}
       </div>
     </article>
+  );
+}
+
+/**
+ * 拼字練習還沒過關時的提示：每個字都拼對過一次，這個單元其他房子才開放。
+ * self：放在拼字練習自己的卡片上，只顯示進度、不放「去拼字練習」按鈕。
+ */
+function SpellingGate({ unitId, self = false }: { unitId: string; self?: boolean }) {
+  const game = useGameStore();
+  const spell = spellingBuildingOf(unitId);
+  const { done, total } = spellingProgress(game, unitId);
+  if (!spell || total === 0) return null;
+  const passed = done >= total;
+  if (passed && !self) return null;
+  const left = unspelledWords(game, unitId);
+  return (
+    <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+      <p className="font-bold">
+        {passed
+          ? "✍️ 拼字練習過關了！這一課的房子都可以玩"
+          : self
+            ? "✍️ 先把每個字都拼對一次，這一課的其他房子才會開放"
+            : "🔒 先去拼字練習，把每個字都拼對一次，這棟才會開放"}
+      </p>
+      <p className="mt-1">
+        已拼對 {done} / {total} 個字
+      </p>
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-amber-200/60">
+        <div
+          className="h-full rounded-full bg-amber-500 transition-all"
+          style={{ width: `${Math.round((done / total) * 100)}%` }}
+        />
+      </div>
+      {!passed && self && left.length <= 8 && (
+        <p className="mt-1 text-xs">
+          還差：{left.map((q) => (q.type === "spell" ? q.prompt : "")).join("、")}
+        </p>
+      )}
+      {!passed && !self && (
+        <button
+          type="button"
+          onClick={() => select({ kind: "building", id: spell.id })}
+          className="chip mt-2 min-h-10 px-3"
+        >
+          {spell.emoji} 去拼字練習 ›
+        </button>
+      )}
+    </div>
   );
 }
 

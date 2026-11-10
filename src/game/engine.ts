@@ -1,4 +1,4 @@
-import { ISLANDS, UNITS, coreIslandsOfUnit } from "@/content/islands";
+import { ISLANDS, UNITS, coreIslandsOfUnit, findBuilding } from "@/content/islands";
 import { createFarmState } from "./farm";
 import { toDateString } from "./review";
 import type { Building, BuildingProgress, GameState, Island, Stars, Unit } from "./types";
@@ -74,6 +74,51 @@ export function islandStatus(state: GameState, islandIndex: number): IslandStatu
 
 export function isBuildingOpen(state: GameState, islandIndex: number): boolean {
   return islandStatus(state, islandIndex) !== "locked";
+}
+
+// ---------- 拼字練習先過關 ----------
+
+/** 這個單元的拼字練習（單字島第 5 棟，自動產生）。 */
+export function spellingBuildingOf(unitId: string): Building | undefined {
+  return ISLANDS.filter((i) => i.unitId === unitId)
+    .flatMap((i) => i.buildings)
+    .find((b) => b.generated === "dictation");
+}
+
+/** 拼字練習裡還沒拼對過的字（題目）。 */
+export function unspelledWords(state: GameState, unitId: string) {
+  const spell = spellingBuildingOf(unitId);
+  if (!spell) return [];
+  return spell.questions.filter((q) => (state.questionStats[q.id]?.right ?? 0) < 1);
+}
+
+/** 拼對過幾個字／總共幾個字。 */
+export function spellingProgress(
+  state: GameState,
+  unitId: string,
+): { done: number; total: number } {
+  const total = spellingBuildingOf(unitId)?.questions.length ?? 0;
+  return { done: total - unspelledWords(state, unitId).length, total };
+}
+
+/** 每個字都拼對過一次＝拼字練習過關；沒有拼字練習的單元直接算過關。 */
+export function spellingPassed(state: GameState, unitId: string): boolean {
+  return unspelledWords(state, unitId).length === 0;
+}
+
+export type BuildingAccess = "open" | "island_locked" | "needs_spelling";
+
+/**
+ * 一棟房子現在能不能挑戰：
+ * 島要開放；而且這個單元的拼字練習要先過關（拼字練習本身、和已經亮燈的房子不受限）。
+ */
+export function buildingAccess(state: GameState, buildingId: string): BuildingAccess {
+  const found = findBuilding(buildingId);
+  if (!found) return "island_locked";
+  const { island, building } = found;
+  if (islandStatus(state, ISLANDS.indexOf(island)) === "locked") return "island_locked";
+  if (building.generated === "dictation" || isLit(state, building.id)) return "open";
+  return spellingPassed(state, island.unitId) ? "open" : "needs_spelling";
 }
 
 /** 目前島上還沒亮燈的建築。 */

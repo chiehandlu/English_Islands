@@ -44,6 +44,11 @@ describe("quiz", () => {
     expect(isCorrect(choice, "fly")).toBe(false);
     expect(isCorrect(spell, " VET ")).toBe(true);
     expect(isCorrect(spell, "vat")).toBe(false);
+    // 字母磚沒有空白：片語不打空白也算對
+    const phrase: Question = { id: "s2", type: "spell", prompt: "郵局", answer: "post office" };
+    expect(isCorrect(phrase, "postoffice")).toBe(true);
+    expect(isCorrect(phrase, "post office")).toBe(true);
+    expect(isCorrect(phrase, "postofice")).toBe(false);
     expect(isCorrect(order, "the cook makes food.")).toBe(true);
     expect(isCorrect(order, "The cook food makes.")).toBe(false);
     expect(isCorrect(yesno, true)).toBe(true);

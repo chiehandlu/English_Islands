@@ -40,6 +40,8 @@ async def answer_current(page, force_wrong=False):
                 letters = letters[1:] + (tiles[0] if tiles[0] != letters[0] else tiles[1])
         for ch in letters:
             await page.locator(".tile:not([disabled])", has_text=ch).first.dispatch_event("click")
+            # 等 React 把按過的字母磚關掉，不然重複字母會按到同一塊
+            await page.wait_for_timeout(60)
         await page.locator("button:has-text('確定')").dispatch_event("click")
         return ("spell", prompt)
     cands = [q for q in Q.values() if q.get("prompt") == prompt]
@@ -139,7 +141,20 @@ async def main():
         print("dictation card mentions trouble:", "常拼錯的字會先出" in card)
         await page.screenshot(path=SHOTS + "/r4-spell-card-trouble.png")
 
-        # 3) 把三座課程島全部點亮（文法島一棟故意錯 2 題，讓複習島有常錯題）
+        # 3) 拼字練習還沒過關：其他房子是鎖的；一直練到每個字都拼對過一次
+        await page.evaluate("location.hash = '#building=u03-v1'"); await page.wait_for_timeout(1200)
+        gate = await page.locator("section").first.inner_text()
+        print("v1 gated before spelling:", "先去拼字練習" in gate)
+        await page.screenshot(path=SHOTS + "/r4b-v1-gated.png")
+        for n in range(8):
+            await page.evaluate("location.hash = '#building=u03-spell'"); await page.wait_for_timeout(1000)
+            card = await page.locator("section").first.inner_text()
+            print("  spell gate:", [l for l in card.splitlines() if "已拼對" in l], flush=True)
+            if "過關了" in card: break
+            await run_building(page, "u03-spell")
+        print("spelling passed after", n, "more runs:", "過關了" in card)
+
+        # 4) 把三座課程島全部點亮（文法島一棟故意錯 2 題，讓複習島有常錯題）
         for isl in U["islands"]:
             for bl in isl["buildings"]:
                 wrong = 2 if bl["id"] == "u03-g1" else 0
@@ -152,7 +167,7 @@ async def main():
         open_text = await page.locator("section").first.inner_text()
         print("review open:", "常答錯" in open_text, "| lock gone:", "複習島就會開放" not in open_text)
 
-        # 4) 文法複習：建築卡顯示常錯題；答完材料是木材／磚塊
+        # 5) 文法複習：建築卡顯示常錯題；答完材料是木材／磚塊
         await page.evaluate("location.hash = '#building=u03-review-grammar'"); await page.wait_for_timeout(1200)
         card = await page.locator("section").first.inner_text()
         print("grammar review card:", [l for l in card.splitlines() if "常答錯" in l or "會掉" in l])
